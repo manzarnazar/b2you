@@ -36,15 +36,13 @@
     <link rel="stylesheet" href="{{asset('public/assets/admin/intltelinput/css/intlTelInput.css')}}">
 
     @php($backgroundChange = \App\CentralLogics\Helpers::get_business_settings('backgroundChange') ?? [])
-    @if (isset($backgroundChange['primary_1_hex']))
     <style>
         :root {
-            --primary: {{ $backgroundChange['primary_1_hex'] }};
-            --primary-dark: {{ $backgroundChange['primary_1_hex'] }};
-            --primary-rgb: {{ $backgroundChange['primary_1_rgb'] ?? '255,107,0' }};
+            --primary: {{ $backgroundChange['primary_1_hex'] ?? '#2a5d7a' }};
+            --primary-dark: {{ $backgroundChange['primary_1_hex'] ?? '#2a5d7a' }};
+            --primary-rgb: {{ $backgroundChange['primary_1_rgb'] ?? '42, 93, 122' }};
         }
     </style>
-    @endif
 
     <link rel="icon" type="image/x-icon" href="{{\App\CentralLogics\Helpers::iconFullUrl()}}">
     @stack('css_or_js')

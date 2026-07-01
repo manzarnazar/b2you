@@ -704,8 +704,8 @@
 } */
 .icon-success {
     color: #fff;
-    border-color: #039D55;
-    background-color: #039D55;
+    border-color: #2a5d7a;
+    background-color: #2a5d7a;
 }
 
 .icon-info {
@@ -746,7 +746,7 @@
 
 .icon-soft-primary {
     color: var(--primary);
-    background: rgba(3, 157, 85, 0.1);
+    background: rgba(42, 93, 122, 0.1);
 }
 
 .icon-soft-secondary {

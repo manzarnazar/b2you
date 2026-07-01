@@ -288,7 +288,7 @@
             dataLabels: {
                 enabled: false,
                 style: {
-                    colors: ['#005555', '#b9e0e0',]
+                    colors: ['#1a3f54', '#b9e0e0',]
                 }
             },
             responsive: [{
@@ -299,9 +299,9 @@
                     },
                 }
             }],
-            colors: ['#005555','#111'],
+            colors: ['#1a3f54','#111'],
             fill: {
-                colors: ['#005555','#b9e0e0']
+                colors: ['#1a3f54','#b9e0e0']
             },
             legend: {
                 show: false
@@ -329,21 +329,21 @@
                 toolbar: {
                     show:false
                 },
-                colors: ['#76ffcd','#ff6d6d', '#005555'],
+                colors: ['#76ffcd','#ff6d6d', '#1a3f54'],
             },
-            colors: ['#76ffcd','#ff6d6d', '#005555'],
+            colors: ['#76ffcd','#ff6d6d', '#1a3f54'],
             dataLabels: {
                 enabled: false,
-                colors: ['#76ffcd','#ff6d6d', '#005555'],
+                colors: ['#76ffcd','#ff6d6d', '#1a3f54'],
             },
             stroke: {
                 curve: 'smooth',
                 width: 2,
-                colors: ['#76ffcd','#ff6d6d', '#005555'],
+                colors: ['#76ffcd','#ff6d6d', '#1a3f54'],
             },
             fill: {
                 type: 'gradient',
-                colors: ['#76ffcd','#ff6d6d', '#005555'],
+                colors: ['#76ffcd','#ff6d6d', '#1a3f54'],
             },
             xaxis: {
                 //   type: 'datetime',

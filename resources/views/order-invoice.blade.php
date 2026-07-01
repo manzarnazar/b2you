@@ -42,7 +42,7 @@ $site_direction = \App\CentralLogics\Helpers::system_default_direction();
         }
 
         :root {
-            --base: #006161
+            --base: #2a5d7a
         }
 
         .main-table {
@@ -144,7 +144,7 @@ $site_direction = \App\CentralLogics\Helpers::system_default_direction();
         }
 
         .text-base {
-            color: #006161;
+            color: #2a5d7a;
             font-weight: 700
         }
 

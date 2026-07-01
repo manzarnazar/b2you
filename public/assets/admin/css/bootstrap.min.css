@@ -18,7 +18,7 @@
     --white: #fff;
     --gray: #8c98a4;
     --gray-dark: #71869d;
-    --primary: #039d55;
+    --primary: #2a5d7a;
     --secondary: #71869d;
     --success: #00c9a7;
     --info: #00c9db;
@@ -20925,7 +20925,7 @@ button:focus {
 
 .badge-soft-primary {
     color: var(--primary);
-    background-color: rgba(3, 157, 85, 0.1);
+    background-color: rgba(42, 93, 122, 0.1);
 }
 
 a.badge-soft-primary:focus,

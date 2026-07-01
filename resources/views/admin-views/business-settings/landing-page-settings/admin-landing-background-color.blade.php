@@ -30,8 +30,8 @@
 
     @php($backgroundChange = \App\Models\BusinessSetting::where(['key' => 'backgroundChange'])->first())
     @php($backgroundChange = isset($backgroundChange->value) ? json_decode($backgroundChange->value, true) : null)
-    @php($currentColor = $backgroundChange['primary_1_hex'] ?? '#EF7822')
-    @php($defaultColor = '#EF7822')
+    @php($currentColor = $backgroundChange['primary_1_hex'] ?? '#2a5d7a')
+    @php($defaultColor = '#2a5d7a')
 
     <div class="card my-2">
         <div class="card-header">
@@ -64,7 +64,7 @@
                         <div class="input-group" style="max-width:200px">
                             <span class="input-group-text" style="background:#f8fafd;border-color:#e7eaf3;font-weight:700;color:#8c98a4">#</span>
                             <input type="text" id="hexInput" class="form-control" value="{{ ltrim($currentColor, '#') }}"
-                                   maxlength="6" pattern="[0-9A-Fa-f]{6}" placeholder="EF7822"
+                                   maxlength="6" pattern="[0-9A-Fa-f]{6}" placeholder="2a5d7a"
                                    style="font-family:monospace;font-size:.9rem;font-weight:600;letter-spacing:.05em;border-color:#e7eaf3">
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                 <div class="mb-4">
                     <label class="form-label mb-2" style="font-size:.8rem;font-weight:600;color:#8c98a4">{{ translate('Quick Presets') }}</label>
                     <div class="d-flex flex-wrap gap-2">
-                        @foreach(['#279B59','#EF7822','#4CAF50','#2196F3','#9C27B0','#E91E63','#FF5722','#009688','#3F51B5','#FF9800','#607D8B'] as $preset)
+                        @foreach(['#2a5d7a','#279B59','#4CAF50','#2196F3','#9C27B0','#E91E63','#FF5722','#009688','#3F51B5','#FF9800','#607D8B'] as $preset)
                         <button type="button" class="color-preset {{ strtoupper($currentColor) === $preset ? 'active' : '' }}" data-color="{{ $preset }}"
                                 style="width:32px;height:32px;border-radius:8px;border:2px solid transparent;background:{{ $preset }};cursor:pointer;transition:.2s;padding:0;outline:none"
                                 title="{{ $preset }}"></button>

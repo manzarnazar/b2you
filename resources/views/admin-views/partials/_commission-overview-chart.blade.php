@@ -20,21 +20,21 @@
           toolbar: {
             show:false
         },
-            colors: ['#76ffcd','#ff6d6d', '#005555'],
+            colors: ['#76ffcd','#ff6d6d', '#1a3f54'],
         },
-            colors: ['#76ffcd','#ff6d6d', '#005555'],
+            colors: ['#76ffcd','#ff6d6d', '#1a3f54'],
         dataLabels: {
           enabled: false,
-            colors: ['#76ffcd','#ff6d6d', '#005555'],
+            colors: ['#76ffcd','#ff6d6d', '#1a3f54'],
         },
         stroke: {
           curve: 'smooth',
           width: 2,
-            colors: ['#76ffcd','#ff6d6d', '#005555'],
+            colors: ['#76ffcd','#ff6d6d', '#1a3f54'],
         },
         fill: {
             type: 'gradient',
-            colors: ['#76ffcd','#ff6d6d', '#005555'],
+            colors: ['#76ffcd','#ff6d6d', '#1a3f54'],
         },
         xaxis: {
         //   type: 'datetime',

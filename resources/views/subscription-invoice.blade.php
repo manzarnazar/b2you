@@ -138,7 +138,7 @@
             font-size: 13px;
             font-weight: 500;
             color: rgba(51, 66, 87, 1);
-            background: rgba(16, 121, 128, 0.08);
+            background: rgba(42, 93, 122, 0.08);
         }
 
         .__subscribe-table thead tr th:first-child {
@@ -227,7 +227,7 @@
                             <div class="mb-1 fz-10" style="white-space: nowrap">
                                 <span class="text-dark">{{translate('invoice_of')}}</span> <span class="font-normal">({{  App\CentralLogics\Helpers::currency_code() }})</span>
                             </div>
-                            <div class="text-right" style="font-size: 24px;font-weight:600;color:#039d55;white-space:nowrap;">{{  App\CentralLogics\Helpers::format_currency($transaction->paid_amount)  }}</div>
+                            <div class="text-right" style="font-size: 24px;font-weight:600;color:#2a5d7a;white-space:nowrap;">{{  App\CentralLogics\Helpers::format_currency($transaction->paid_amount)  }}</div>
                         </td>
                     </tr>
                     <tr>
@@ -323,7 +323,7 @@
                 </table>
             </div>
             <table><tr><td style="padding: 10px"></td></tr></table>
-            <table class="border-0 footer-table" style="text-align:center; background-color: rgba(16, 121, 128, 0.08)">
+            <table class="border-0 footer-table" style="text-align:center; background-color: rgba(42, 93, 122, 0.08)">
                 <tr>
                     <td style="padding: 10px;">
                         {{url('/') }}

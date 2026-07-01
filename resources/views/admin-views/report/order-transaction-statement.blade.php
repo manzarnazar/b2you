@@ -289,9 +289,9 @@
         <table class="customers bs-0">
             <thead>
                 <tr>
-                    <th style="background-color: #107980 important">{{translate('SL')}}</th>
-                    <th style="background-color: #107980 important">{{translate('details')}}</th>
-                    <th style="background-color: #107980 important">{{translate('amount')}}</th>
+                    <th style="background-color: #2a5d7a important">{{translate('SL')}}</th>
+                    <th style="background-color: #2a5d7a important">{{translate('details')}}</th>
+                    <th style="background-color: #2a5d7a important">{{translate('amount')}}</th>
                 </tr>
             </thead>
             @php

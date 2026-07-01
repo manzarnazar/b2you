@@ -389,7 +389,7 @@
             dataLabels: {
                 enabled: false,
                 style: {
-                    colors: ['#ffffff', '#ffffff', '#107980']
+                    colors: ['#ffffff', '#ffffff', '#2a5d7a']
                 }
             },
             responsive: [{
@@ -400,9 +400,9 @@
                     },
                 }
             }],
-            colors: ['#107980', '#56B98F', '#111'],
+            colors: ['#2a5d7a', '#4a8aab', '#111'],
             fill: {
-                colors: ['#107980', '#56B98F', '#E5F5F1']
+                colors: ['#2a5d7a', '#4a8aab', '#E5F5F1']
             },
             legend: {
                 show: false

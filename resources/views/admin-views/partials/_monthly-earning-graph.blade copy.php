@@ -51,9 +51,9 @@
                   },
                   {
                     "data": [{{data_get($delivery_commission,1,'0')}},{{data_get($delivery_commission,2,'0')}},{{data_get($delivery_commission,3,'0')}},{{data_get($delivery_commission,4,'0')}},{{data_get($delivery_commission,5,'0')}},{{data_get($delivery_commission,6,'0')}},{{data_get($delivery_commission,7,'0')}},{{data_get($delivery_commission,8,'0')}},{{data_get($delivery_commission,9,'0')}},{{data_get($delivery_commission,10,'0')}},{{data_get($delivery_commission,11,'0')}},{{data_get($delivery_commission,12,'0')}}],
-                    "backgroundColor": "#005555",
-                    "hoverBackgroundColor": "#005555",
-                    "borderColor": "#005555"
+                    "backgroundColor": "#1a3f54",
+                    "hoverBackgroundColor": "#1a3f54",
+                    "borderColor": "#1a3f54"
                   }
                   ]
                 },

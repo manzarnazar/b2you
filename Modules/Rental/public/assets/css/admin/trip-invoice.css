@@ -32,7 +32,7 @@ h6 {
 }
 
 :root {
-    --base: #006161
+    --base: #2a5d7a
 }
 
 .main-table {
@@ -134,7 +134,7 @@ div {
 }
 
 .text-base {
-    color: #006161;
+    color: #2a5d7a;
     font-weight: 700
 }
 

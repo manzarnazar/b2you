@@ -844,10 +844,10 @@
             curve: 'straight',
             width: 2,
         },
-        colors: ['#107980'],
+        colors: ['#2a5d7a'],
         fill: {
             type: 'gradient',
-            colors: ['#107980'],
+            colors: ['#2a5d7a'],
         },
         xaxis: {
             //   type: 'datetime',

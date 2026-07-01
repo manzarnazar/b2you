@@ -43,7 +43,7 @@ $site_direction = \App\CentralLogics\Helpers::system_default_direction();
         }
 
         :root {
-            --base: #006161
+            --base: #2a5d7a
         }
 
         .main-table {
