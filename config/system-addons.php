@@ -29,28 +29,28 @@
   'vendor_app' => 
   array (
     'active' => '1',
-    'username' => '',
-    'purchase_key' => '',
+    'username' => 'sandrojvs',
+    'purchase_key' => 'eabd3c74-cff1-4cbe-ad52-664db23b2fe3',
     'software_id' => 'MzY3NzIxNzM=',
-    'domain' => '',
+    'domain' => 'admin.b2you.co.uk',
     'software_type' => 'addon',
   ),
   'deliveryman_app' => 
   array (
     'active' => '1',
-    'username' => '',
-    'purchase_key' => '',
+    'username' => 'sandrojvs',
+    'purchase_key' => '38d148b8-34ca-4a5a-80ba-39d9af6c34e5',
     'software_id' => 'MzY3NzIxNDg=',
-    'domain' => '',
+    'domain' => 'admin.b2you.co.uk',
     'software_type' => 'addon',
   ),
   'react_web' => 
   array (
     'active' => '1',
-    'username' => '',
-    'purchase_key' => '',
+    'username' => 'sandrojvs',
+    'purchase_key' => '39586388-3528-4989-bc9a-02c5db760d12',
     'software_id' => 'NDUzNzAzNTE=',
-    'domain' => '',
+    'domain' => 'admin.b2you.co.uk',
     'software_type' => 'addon',
   ),
 );

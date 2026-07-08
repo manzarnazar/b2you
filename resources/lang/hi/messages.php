@@ -11578,5 +11578,4 @@ Smartly or Earn. ',
   'loyalty_point_not_enabled' => 'Loyalty point not enabled',
   'how_to_get_the_snapchat_pixel_id' => 'How to get the snapchat pixel id',
   'paste_your_pinterest_tag_id_into_the_input_box_and_click_submit.' => 'Paste your pinterest tag id into the input box and click submit.',
-  'E-commerce  Module' => 'E-commerce  Module',
 );
