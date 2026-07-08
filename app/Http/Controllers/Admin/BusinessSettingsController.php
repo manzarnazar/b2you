@@ -23,6 +23,7 @@ use App\Models\NotificationSetting;
 use App\Models\OrderCancelReason;
 use App\Models\PharmacyItemDetails;
 use App\Models\PriorityList;
+use App\Models\ReactHeroBanner;
 use App\Models\ReactPromotionalBanner;
 use App\Models\ReactTestimonial;
 use App\Models\RefundReason;
@@ -7434,6 +7435,47 @@ class BusinessSettingsController extends Controller
         $ReactPromotionalBanner->status = $request->status;
         $ReactPromotionalBanner->save();
         Toastr::success(translate('messages.React_promotional_banner_status_updated'));
+        return back();
+    }
+
+    public function react_hero_banner_store(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|max:2048',
+        ]);
+
+        $react_hero_banner = new ReactHeroBanner();
+        $react_hero_banner->image = Helpers::upload(dir: 'hero_banner/', format: 'png', image: $request->file('image'));
+        $react_hero_banner->save();
+
+        Toastr::success(translate('messages.React_hero_banner_added_successfully'));
+        return back();
+    }
+
+    public function react_hero_banner_update(Request $request, $id)
+    {
+        $ReactHeroBanner = ReactHeroBanner::findOrFail($id);
+        $ReactHeroBanner->image = $request->has('image') ? Helpers::update(dir: 'hero_banner/', old_image: $ReactHeroBanner->image, format: 'png', image: $request->file('image')) : $ReactHeroBanner->image;
+        $ReactHeroBanner->save();
+
+        Toastr::success(translate('messages.React_hero_banner_updated_successfully'));
+        return back();
+    }
+
+    public function react_hero_banner_destroy(ReactHeroBanner $react_hero_banner)
+    {
+        Helpers::check_and_delete('hero_banner/', $react_hero_banner->image);
+        $react_hero_banner?->delete();
+        Toastr::success(translate('messages.React_hero_banner_deleted_successfully'));
+        return back();
+    }
+
+    public function react_hero_banner_status(Request $request)
+    {
+        $ReactHeroBanner = ReactHeroBanner::findOrFail($request->id);
+        $ReactHeroBanner->status = $request->status;
+        $ReactHeroBanner->save();
+        Toastr::success(translate('messages.React_hero_banner_status_updated'));
         return back();
     }
 

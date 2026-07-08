@@ -17,6 +17,7 @@ use App\Models\Module;
 use App\Models\OfflinePaymentMethod;
 use App\Models\PageSeoData;
 use App\Models\ParcelCancellationReason;
+use App\Models\ReactHeroBanner;
 use App\Models\ReactPromotionalBanner;
 use App\Models\ReactTestimonial;
 use App\Models\Setting;
@@ -900,6 +901,15 @@ class ConfigController extends Controller
             'header_tag_line' => (isset($settings['header_tag_line'])) ? $settings['header_tag_line'] : null,
             'pick_location_title' => (isset($settings['pick_location_title'])) ? $settings['pick_location_title'] : null,
         ];
+        $hero_banners = [];
+        $hero_banners_data = ReactHeroBanner::where('status', 1)->get();
+        foreach ($hero_banners_data as $value) {
+            $hero_banners[] = $value->image_full_url;
+        }
+        $heroSliderSection = [
+            'hero_slider_section_status' => (int)($settings['hero_slider_section_status'] ?? 0),
+            'hero_banners_full_url' => $hero_banners,
+        ];
         $trustSection = [
             'trust_section_status' => (isset($settings['trust_section_status'])) ? (int)$settings['trust_section_status'] : 0,
             'cards' => [],
@@ -1080,6 +1090,7 @@ class ConfigController extends Controller
         return response()->json(
             [
                 'hero_section' => $heroSection,
+                'hero_slider_section' => $heroSliderSection,
                 'trust_section' => $trustSection,
                 'available_zone_section' => $availableZoneSection,
                 'promotional_banner_section' => $promotionalBannerSection,

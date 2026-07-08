@@ -399,6 +399,12 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::post('promotional-banner/update/{id}', [BusinessSettingsController::class, 'react_promotional_banner_update'])->name('promotional-banner-update');
             Route::delete('promotional-banner/delete/{react_promotional_banner}', [BusinessSettingsController::class, 'react_promotional_banner_destroy'])->name('promotional-banner-delete');
 
+            //hero slider banner
+            Route::post('hero-banner-store/', [BusinessSettingsController::class, 'react_hero_banner_store'])->name('hero-banner-store');
+            Route::get('hero-banner-status/{id}/{status}', [BusinessSettingsController::class, 'react_hero_banner_status'])->name('hero-banner-status');
+            Route::post('hero-banner/update/{id}', [BusinessSettingsController::class, 'react_hero_banner_update'])->name('hero-banner-update');
+            Route::delete('hero-banner/delete/{react_hero_banner}', [BusinessSettingsController::class, 'react_hero_banner_destroy'])->name('hero-banner-delete');
+
 
             Route::post('review-react-section/update/{id}', 'BusinessSettingsController@review_react_update')->name('review-react-update');
             Route::delete('review-react/delete/{review}', 'BusinessSettingsController@review_react_destroy')->name('review-react-delete');
