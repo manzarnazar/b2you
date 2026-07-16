@@ -348,6 +348,17 @@
                                     </div>
                                 </div>
                             @endif
+
+                            <div class="col-sm-6 col-lg-4 error-wrapper" id="age_restricted">
+                                <div class="form-check mb-sm-2 pb-sm-1">
+                                    <input class="form-check-input" name="age_restricted" type="checkbox" value="1"
+                                        id="is_age_restricted"
+                                        {{ isset($product) && $product->age_restricted == 1 ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="is_age_restricted">
+                                        {{ translate('messages.age_restricted_18_plus') }}
+                                    </label>
+                                </div>
+                            </div>
     
     
                         </div>

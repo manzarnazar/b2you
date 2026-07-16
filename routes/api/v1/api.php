@@ -295,6 +295,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::put('reply-update', 'ItemController@update_reply');
             Route::get('recommended', 'ItemController@recommended');
             Route::get('organic', 'ItemController@organic');
+            Route::get('age-restricted', 'ItemController@age_restricted');
             Route::get('pending/item/list', 'ItemController@pending_item_list');
             Route::get('requested/item/view/{id}', 'ItemController@requested_item_view');
             Route::put('stock-update', 'ItemController@stock_update');
@@ -359,6 +360,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::get('info', 'CustomerController@info');
             Route::get('update-zone', 'CustomerController@update_zone');
             Route::post('update-profile', 'CustomerController@update_profile');
+            Route::post('age-verification', 'CustomerController@age_verification');
             Route::post('update-interest', 'CustomerController@update_interest');
             Route::put('cm-firebase-token', 'CustomerController@update_cm_firebase_token');
             Route::get('suggested-items', 'CustomerController@get_suggested_item');

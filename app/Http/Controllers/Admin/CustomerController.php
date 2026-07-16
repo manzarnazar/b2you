@@ -239,6 +239,24 @@ class CustomerController extends Controller
         return back();
     }
 
+    public function age_verify(User $customer, $status)
+    {
+        $status = (int) $status;
+        if ($status === 1) {
+            $customer->is_age_verified = 1;
+            $customer->age_verified_at = now();
+            $customer->age_verified_by = 'admin';
+        } else {
+            $customer->is_age_verified = 0;
+            $customer->age_verified_at = null;
+            $customer->age_verified_by = null;
+        }
+        $customer->save();
+
+        Toastr::success(translate('messages.customer_age_verification_updated'));
+        return back();
+    }
+
     public function rentalView(Request $request,$id)
     {
         $key = $request['search'];

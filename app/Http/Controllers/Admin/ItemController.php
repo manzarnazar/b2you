@@ -361,6 +361,7 @@ class ItemController extends Controller
         if ($module_type == 'grocery') {
             $item->organic = $request->organic ?? 0;
         }
+        $item->age_restricted = $request->age_restricted ?? 0;
         $item->stock = $request->current_stock ?? 0;
         $item->images = $images;
         $item->is_halal = $request->is_halal ?? 0;
@@ -710,6 +711,7 @@ class ItemController extends Controller
         $item->stock = $request->current_stock ?? 0;
         $item->is_halal = $request->is_halal ?? 0;
         $item->organic = $request->organic ?? 0;
+        $item->age_restricted = $request->age_restricted ?? 0;
         $item->veg = $request->veg ?? 0;
         $item->images = $images;
         if (Helpers::get_mail_status('product_approval') && $request?->temp_product) {
@@ -2171,6 +2173,7 @@ class ItemController extends Controller
         $item->veg = $data->veg;
 
         $item->organic = $data->organic;
+        $item->age_restricted = $data->age_restricted ?? 0;
         $item->is_halal = $data->is_halal;
         $item->stock = $data->stock;
         $item->is_approved = 1;

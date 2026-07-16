@@ -55,8 +55,11 @@ class User extends Authenticatable
         'wallet_balance' => 'float',
         'loyalty_point' => 'integer',
         'ref_by' => 'integer',
+        'date_of_birth' => 'date',
+        'is_age_verified' => 'integer',
+        'age_verified_at' => 'datetime',
     ];
-    protected $appends = ['image_full_url'];
+    protected $appends = ['image_full_url', 'age_verification_document_full_url'];
     public function getImageFullUrlAttribute(){
         $value = $this->image;
         if (count($this->storage) > 0) {
@@ -68,6 +71,23 @@ class User extends Authenticatable
         }
 
         return Helpers::get_full_url('profile',$value,'public');
+    }
+
+    public function getAgeVerificationDocumentFullUrlAttribute()
+    {
+        $value = $this->age_verification_document;
+        if (!$value) {
+            return null;
+        }
+        if (count($this->storage) > 0) {
+            foreach ($this->storage as $storage) {
+                if ($storage['key'] == 'age_verification_document') {
+                    return Helpers::get_full_url('age-verification', $value, $storage['value']);
+                }
+            }
+        }
+
+        return Helpers::get_full_url('age-verification', $value, 'public');
     }
 
     public function getFullNameAttribute(): string
@@ -146,6 +166,19 @@ class User extends Authenticatable
                     'data_type' => get_class($model),
                     'data_id' => $model->id,
                     'key' => 'image',
+                ], [
+                    'value' => $value,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+            if ($model->isDirty('age_verification_document')) {
+                $value = Helpers::getDisk();
+
+                DB::table('storages')->updateOrInsert([
+                    'data_type' => get_class($model),
+                    'data_id' => $model->id,
+                    'key' => 'age_verification_document',
                 ], [
                     'value' => $value,
                     'created_at' => now(),

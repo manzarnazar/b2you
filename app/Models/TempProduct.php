@@ -27,6 +27,7 @@ class TempProduct extends Model
         'recommended' => 'integer',
         'maximum_cart_quantity' => 'integer',
         'organic' => 'integer',
+        'age_restricted' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'veg'=>'integer',

@@ -1076,6 +1076,13 @@ trait PlaceNewOrder
                     ];
                 }
 
+                if (($product->age_restricted ?? 0) == 1) {
+                    $ageGate = $this->checkAgeVerification($request);
+                    if ($ageGate) {
+                        return $ageGate;
+                    }
+                }
+
                 if ($product?->maximum_cart_quantity && $c['quantity'] > $product?->maximum_cart_quantity) {
                     return [
                         'status_code' => 403,
@@ -1250,6 +1257,13 @@ trait PlaceNewOrder
                             'code' => 'prescription',
                             'message' => translate('messages.prescription_is_required_for_this_order'),
                         ];
+                    }
+
+                    if (($product->age_restricted ?? 0) == 1) {
+                        $ageGate = $this->checkAgeVerification($request);
+                        if ($ageGate) {
+                            return $ageGate;
+                        }
                     }
 
                     if ($product?->maximum_cart_quantity && $c['quantity'] > $product?->maximum_cart_quantity) {
@@ -1432,6 +1446,13 @@ trait PlaceNewOrder
                             'code' => 'prescription',
                             'message' => translate('messages.prescription_is_required_for_this_order'),
                         ];
+                    }
+
+                    if (($product->age_restricted ?? 0) == 1) {
+                        $ageGate = $this->checkAgeVerification($request);
+                        if ($ageGate) {
+                            return $ageGate;
+                        }
                     }
 
                     if ($product?->maximum_cart_quantity && $c['quantity'] > $product?->maximum_cart_quantity) {
@@ -2068,6 +2089,31 @@ trait PlaceNewOrder
             session()->put('extra_discount', $discount );
 
         return true;
+    }
+
+    private function checkAgeVerification(Request $request): ?array
+    {
+        if (!$request->user) {
+            return [
+                'status_code' => 403,
+                'code' => 'age_verification_required',
+                'message' => translate('messages.age_verification_required'),
+            ];
+        }
+
+        $user = $request->user instanceof User
+            ? $request->user
+            : User::find($request->user->id ?? null);
+
+        if (!$user || (int) ($user->is_age_verified ?? 0) !== 1) {
+            return [
+                'status_code' => 403,
+                'code' => 'age_verification_required',
+                'message' => translate('messages.age_verification_required'),
+            ];
+        }
+
+        return null;
     }
 
 

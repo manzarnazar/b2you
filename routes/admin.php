@@ -684,6 +684,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::get('view/{user_id}', 'CustomerController@view')->name('view');
             Route::post('search', 'CustomerController@search')->name('search');
             Route::get('status/{customer}/{status}', 'CustomerController@status')->name('status');
+            Route::get('age-verify/{customer}/{status}', 'CustomerController@age_verify')->name('age-verify');
         });
 
 
@@ -758,6 +759,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
                 Route::get('view/{user_id}', 'CustomerController@view')->name('view');
                 Route::post('search', 'CustomerController@search')->name('search');
                 Route::get('status/{customer}/{status}file-manager', 'CustomerController@status')->name('status');
+                Route::get('age-verify/{customer}/{status}', 'CustomerController@age_verify')->name('age-verify');
             });
             Route::group(['prefix' => 'contact', 'as' => 'contact.', 'middleware' => ['module:customer_management']], function () {
                 Route::get('contact-list', 'ContactController@list')->name('contact-list');

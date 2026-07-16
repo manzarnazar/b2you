@@ -19,6 +19,45 @@
                         <div>{{ translate('email') }}</div>:
                         <a href="mailto:{{ $customer['email'] }}" class="text-dark font-semibold">{{$customer['email'] ?? translate('messages.N/A')}}</a>
                     </div>
+                    <div class="key-val-list-item d-flex gap-3">
+                        <div>{{ translate('messages.date_of_birth') }}</div>:
+                        <div class="font-semibold">{{ $customer->date_of_birth ? \Carbon\Carbon::parse($customer->date_of_birth)->format('d M Y') : translate('messages.N/A') }}</div>
+                    </div>
+                    <div class="key-val-list-item d-flex gap-3 align-items-center flex-wrap">
+                        <div>{{ translate('messages.age_verified') }}</div>:
+                        @if((int) $customer->is_age_verified === 1)
+                            <span class="badge badge-soft-success">{{ translate('messages.age_verified') }}</span>
+                            @if($customer->age_verified_by)
+                                <span class="text-muted fs-12">({{ $customer->age_verified_by }})</span>
+                            @endif
+                            <a href="{{ route('admin.users.customer.age-verify', [$customer->id, 0]) }}"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('{{ translate('messages.revoke_age_verification') }}?')">
+                                {{ translate('messages.revoke_age_verification') }}
+                            </a>
+                        @else
+                            <span class="badge badge-soft-danger">{{ translate('messages.not_age_verified') }}</span>
+                            <a href="{{ route('admin.users.customer.age-verify', [$customer->id, 1]) }}"
+                               class="btn btn-sm btn-outline-success"
+                               onclick="return confirm('{{ translate('messages.mark_as_18_plus') }}?')">
+                                {{ translate('messages.mark_as_18_plus') }}
+                            </a>
+                        @endif
+                    </div>
+                    @if($customer->age_verification_document_type)
+                        <div class="key-val-list-item d-flex gap-3">
+                            <div>{{ translate('messages.age_verification_document') }}</div>:
+                            <div class="font-semibold">{{ translate('messages.'.$customer->age_verification_document_type) }}</div>
+                        </div>
+                    @endif
+                    @if($customer->age_verification_document_full_url)
+                        <div class="key-val-list-item d-flex gap-3 align-items-start">
+                            <div>{{ translate('messages.age_verification_document') }}</div>:
+                            <a href="{{ $customer->age_verification_document_full_url }}" target="_blank">
+                                <img src="{{ $customer->age_verification_document_full_url }}" alt="document" width="80" height="80" class="rounded border" style="object-fit:cover">
+                            </a>
+                        </div>
+                    @endif
                     @foreach($customer->addresses as $address)
                         <div class="key-val-list-item d-flex gap-3">
                             <div>{{ translate('address') }}</div>:

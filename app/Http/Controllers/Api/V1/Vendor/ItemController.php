@@ -349,6 +349,7 @@ class ItemController extends Controller
         $item->images = $images;
         $item->unit_id = $request->unit;
         $item->organic = $request->organic??0;
+        $item->age_restricted = $request->age_restricted??0;
         $item->is_halal =  $request->is_halal ?? 0;
         $item->save();
         $item->tags()->sync($tag_ids);
@@ -700,6 +701,7 @@ class ItemController extends Controller
         $p->veg = $request->veg??0;
         $p->unit_id = $request->unit;
         $p->organic = $request->organic??0;
+        $p->age_restricted = $request->age_restricted??0;
         $p->is_halal =  $request->is_halal ?? 0;
 
         $product_approval_datas = \App\Models\BusinessSetting::where('key', 'product_approval_datas')->first()?->value ?? '';
@@ -985,6 +987,33 @@ class ItemController extends Controller
 
     }
 
+    public function age_restricted(Request $request)
+    {
+        if(!$request->vendor->stores[0]->item_section)
+        {
+            return response()->json([
+                'errors'=>[
+                    ['code'=>'unauthorized', 'message'=>translate('messages.permission_denied')]
+                ]
+            ],403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'age_restricted' => 'required|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+        $product = Item::find($request->id);
+        $product->age_restricted = $request->age_restricted??0;
+        $product->save();
+
+        return response()->json(['message' => translate('messages.product_age_restricted_status_updated')], 200);
+
+    }
+
 
     public function recommended(Request $request)
     {
@@ -1053,6 +1082,7 @@ class ItemController extends Controller
         $item->maximum_cart_quantity = $data->maximum_cart_quantity;
         $item->veg = $data->veg ?? 0;
         $item->organic = $data->organic ?? 0;
+        $item->age_restricted = $data->age_restricted ?? 0;
         $item->stock =  $data->stock ?? 0;
         $item->common_condition_id =  $request->condition_id ?? 0;
         $item->brand_id =  $request->brand_id ?? 0;

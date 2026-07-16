@@ -320,7 +320,49 @@ class CustomerController extends Controller
         }
 
         unset($data['orders']);
+        unset($data['age_verification_document']);
+        unset($data['age_verification_document_full_url']);
         return response()->json($data, 200);
+    }
+
+    public function age_verification(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'date_of_birth' => 'required|date|before:today',
+            'document_type' => 'required|in:government_id,passport,driving_licence',
+            'document_image' => 'required|file|max:10240',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
+        $dob = Carbon::parse($request->date_of_birth);
+        if ($dob->age < 18) {
+            return response()->json([
+                'errors' => [
+                    ['code' => 'date_of_birth', 'message' => translate('messages.you_must_be_at_least_18_years_old')]
+                ]
+            ], 403);
+        }
+
+        $user = User::findOrFail($request->user()->id);
+        $imageName = Helpers::upload('age-verification/', 'png', $request->file('document_image'));
+
+        $user->date_of_birth = $dob->toDateString();
+        $user->age_verification_document_type = $request->document_type;
+        $user->age_verification_document = $imageName;
+        $user->is_age_verified = 1;
+        $user->age_verified_at = now();
+        $user->age_verified_by = 'self';
+        $user->save();
+
+        return response()->json([
+            'message' => translate('messages.age_verification_submitted_successfully'),
+            'is_age_verified' => (int) $user->is_age_verified,
+            'date_of_birth' => $user->date_of_birth?->format('Y-m-d'),
+            'age_verification_document_type' => $user->age_verification_document_type,
+        ], 200);
     }
 
     public function saved_files(Request $request)

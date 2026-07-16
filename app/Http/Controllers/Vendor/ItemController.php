@@ -409,6 +409,7 @@ class ItemController extends Controller
         if ($module_type == 'grocery') {
             $food->organic = $request->organic ?? 0;
         }
+        $food->age_restricted = $request->age_restricted ?? 0;
         $food->is_halal = $request->is_halal ?? 0;
         $food->save();
         $food->tags()->sync($tag_ids);
@@ -780,6 +781,7 @@ class ItemController extends Controller
         $p->add_ons = $request->has('addon_ids') ? json_encode($request->addon_ids) : json_encode([]);
         $p->stock = $request->current_stock ?? 0;
         $p->organic = $request->organic ?? 0;
+        $p->age_restricted = $request->age_restricted ?? 0;
         $p->is_halal = $request->is_halal ?? 0;
 
 
@@ -1756,6 +1758,7 @@ class ItemController extends Controller
         $temp_item->maximum_cart_quantity = $data->maximum_cart_quantity;
         $temp_item->veg = $data->veg ?? 0;
         $temp_item->organic = $data->organic ?? 0;
+        $temp_item->age_restricted = $data->age_restricted ?? 0;
         $temp_item->is_halal = $request->is_halal ?? 0;
         $temp_item->basic =  $data->basic ?? 0;
         $temp_item->common_condition_id =  $data->common_condition_id;
