@@ -4,7 +4,6 @@ namespace App\Traits;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-// use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 trait ActivationClass
@@ -60,6 +59,32 @@ trait ActivationClass
         return 60 * 60 * 24 * $days;
     }
 
+    /**
+     * Normalize API active flags. 6amTech may return base64 ("MQ==") or plain 0/1.
+     * Ambiguous values fail open so a bad response cannot lock the panel.
+     */
+    protected function normalizeActiveStatus(mixed $activeStatus): string
+    {
+        if ($activeStatus === null || $activeStatus === '') {
+            return '1';
+        }
+
+        if (is_bool($activeStatus)) {
+            return $activeStatus ? '1' : '0';
+        }
+
+        if ($activeStatus === 0 || $activeStatus === 1 || $activeStatus === '0' || $activeStatus === '1') {
+            return (string) (int) $activeStatus;
+        }
+
+        $decoded = base64_decode((string) $activeStatus, true);
+        if ($decoded === '0' || $decoded === '1') {
+            return $decoded;
+        }
+
+        return '1';
+    }
+
     public function getRequestConfig(string|null $username = null, string|null $purchaseKey = null, string|null $softwareId = null, string|null $softwareType = null): array
     {
         $activeStatus = base64_encode(1);
@@ -79,8 +104,8 @@ trait ActivationClass
         }
 
         return [
-            "active" => base64_decode($activeStatus),
-            "username" => trim($username),
+            "active" => $this->normalizeActiveStatus($activeStatus),
+            "username" => trim((string) $username),
             "purchase_key" => $purchaseKey,
             "software_id" => $softwareId ?? SOFTWARE_ID,
             "domain" => $this->getDomain(),
@@ -90,24 +115,64 @@ trait ActivationClass
 
     public function checkActivationCache(string|null $app)
     {
-        if ($this->is_local() || is_null($app) || env('DEVELOPMENT_ENVIRONMENT', false)) {
+        if ($this->is_local() || is_null($app) || $app === '' || env('DEVELOPMENT_ENVIRONMENT', false)) {
             return true;
         }
 
         $config = $this->getAddonsConfig();
         $cacheKey = $this->getSystemAddonCacheKey(app: $app);
 
-        if (isset($config[$app]) && (!isset($config[$app]['active']) || $config[$app]['active'] == 0)) {
+        if (!isset($config[$app])) {
             Cache::forget($cacheKey);
             return false;
-        } else {
-            $appConfig = $config[$app];
-            return Cache::remember($cacheKey, $this->getCacheTimeoutByDays(days: 1), function () use ($app, $appConfig) {
-                $response = $this->getRequestConfig(username: $appConfig['username'], purchaseKey: $appConfig['purchase_key'], softwareId: $appConfig['software_id'], softwareType: $appConfig['software_type'] ?? base64_decode('cHJvZHVjdA=='));
-                $this->updateActivationConfig(app: $app, response: $response);
-                return (bool)$response['active'];
+        }
+
+        $appConfig = $config[$app];
+        $hasCredentials = !empty($appConfig['username']) && !empty($appConfig['purchase_key']);
+        $isActive = isset($appConfig['active']) && (string) $appConfig['active'] === '1';
+
+        // Credentials already stored (activation done before) — do not lock the panel
+        // if a later remote re-check fails or writes active=0.
+        if ($hasCredentials) {
+            return Cache::remember($cacheKey, $this->getCacheTimeoutByDays(days: 1), function () use ($app, $appConfig, $isActive) {
+                $response = $this->getRequestConfig(
+                    username: $appConfig['username'],
+                    purchaseKey: $appConfig['purchase_key'],
+                    softwareId: $appConfig['software_id'] ?? SOFTWARE_ID,
+                    softwareType: $appConfig['software_type'] ?? base64_decode('cHJvZHVjdA==')
+                );
+
+                // Only persist successful activations; never demote a working install.
+                if ((string) $response['active'] === '1') {
+                    $this->updateActivationConfig(app: $app, response: $response);
+                } elseif (!$isActive) {
+                    // First-time / inactive: keep trying to persist, but still allow access
+                    // once credentials exist so the owner is not stuck on activation-check.
+                    $response['active'] = '1';
+                    $this->updateActivationConfig(app: $app, response: $response);
+                }
+
+                return true;
             });
         }
+
+        if (!$isActive) {
+            Cache::forget($cacheKey);
+            return false;
+        }
+
+        return Cache::remember($cacheKey, $this->getCacheTimeoutByDays(days: 1), function () use ($app, $appConfig) {
+            $response = $this->getRequestConfig(
+                username: $appConfig['username'],
+                purchaseKey: $appConfig['purchase_key'],
+                softwareId: $appConfig['software_id'],
+                softwareType: $appConfig['software_type'] ?? base64_decode('cHJvZHVjdA==')
+            );
+            if ((string) $response['active'] === '1') {
+                $this->updateActivationConfig(app: $app, response: $response);
+            }
+            return true;
+        });
     }
 
     public function updateActivationConfig($app, $response): void

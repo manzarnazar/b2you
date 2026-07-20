@@ -2,7 +2,7 @@
   'admin_panel' => 
   array (
     'active' => '1',
-    'username' => 'sandrojvs',
+    'username' => 'Sandrojvs',
     'purchase_key' => 'b1dbf155-9c2d-45c4-b1c9-87b0930f147a',
     'software_id' => 'MzY3NzIxMTI=',
     'domain' => 'admin.b2you.co.uk',

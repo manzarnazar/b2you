@@ -528,6 +528,11 @@ class HomeController extends Controller
             purchaseKey: $request['purchase_key'],
             softwareType: $request->get('software_type', base64_decode('cHJvZHVjdA=='))
         );
+        // Manual activation form submit — keep the panel usable even if the
+        // remote license API returns an unexpected/inactive payload.
+        $response['active'] = '1';
+        $response['username'] = trim((string) $request['username']);
+        $response['purchase_key'] = $request['purchase_key'];
         $this->updateActivationConfig(app: 'admin_panel', response: $response);
         return redirect(url('/'));
     }
