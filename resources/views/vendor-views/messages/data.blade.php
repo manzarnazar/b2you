@@ -1,4 +1,4 @@
-@if($conversations->count() > 0)
+@if(is_object($conversations) ? $conversations->count() > 0 : count($conversations) > 0)
 @foreach($conversations as $conv)
 @php($user= $conv->sender_type == 'vendor' ? $conv->receiver :  $conv->sender)
 @if (isset($user ) && $conv->last_message)

@@ -38,8 +38,8 @@
                             <span class="text-truncate">{{ translate('messages.chat') }}</span>
                         </a>
                     </li>
-                    <li class="navbar-vertical-aside-has-menu {{ Request::is('vendor-panel/profile*') ? 'active' : '' }}">
-                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('vendor.profile.view') }}">
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('vendor-panel/profile*') || Request::is('vendor-panel/store*') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('vendor.shop.view') }}">
                             <i class="tio-shop nav-icon"></i>
                             <span class="text-truncate">{{ translate('messages.my_shop') }}</span>
                         </a>

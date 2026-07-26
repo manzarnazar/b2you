@@ -17,42 +17,48 @@ class ConversationController extends Controller
 {
     public function list(Request $request)
     {
-        $vendor = Helpers::get_vendor_data();
-        $vendor = UserInfo::where('vendor_id',$vendor->id)->first();
-        if($vendor){
-            $conversations = Conversation::with(['sender','receiver', 'last_message'])->WhereUser($vendor->id);
-            if($request->query('key')) {
+        $vendorData = Helpers::get_vendor_data();
+        $store = Helpers::get_store_data();
+
+        $vendor = UserInfo::where('vendor_id', $vendorData->id)->first();
+        if (!$vendor) {
+            $vendor = new UserInfo();
+            $vendor->vendor_id = $vendorData->id;
+            $vendor->f_name = $store->name ?? ($vendorData->f_name ?? 'Store');
+            $vendor->l_name = '';
+            $vendor->phone = $vendorData->phone ?? $store->phone ?? null;
+            $vendor->email = $vendorData->email ?? $store->email ?? null;
+            $vendor->image = $store->logo ?? null;
+            $vendor->save();
+        }
+
+        $conversations = Conversation::with(['sender', 'receiver', 'last_message'])
+            ->WhereUser($vendor->id)
+            ->when($request->query('key'), function ($query) use ($request) {
                 $key = explode(' ', $request->get('key'));
-                $conversations = $conversations->where(function($qu)use($key){
-                    $qu->whereHas('sender',function($query)use($key){
+                $query->where(function ($qu) use ($key) {
+                    $qu->whereHas('sender', function ($q) use ($key) {
                         foreach ($key as $value) {
-                            $query->where('f_name', 'like', "%{$value}%")
-                            ->orWhere('l_name', 'like', "%{$value}%")
-                            ->orWhere('phone', 'like', "%{$value}%");
+                            $q->where('f_name', 'like', "%{$value}%")
+                                ->orWhere('l_name', 'like', "%{$value}%")
+                                ->orWhere('phone', 'like', "%{$value}%");
                         }
-                    })
-                    ->orWhereHas('receiver',function($query1)use($key){
+                    })->orWhereHas('receiver', function ($q) use ($key) {
                         foreach ($key as $value) {
-                            $query1->where('f_name', 'like', "%{$value}%")
-                            ->orWhere('l_name', 'like', "%{$value}%")
-                            ->orWhere('phone', 'like', "%{$value}%");
+                            $q->where('f_name', 'like', "%{$value}%")
+                                ->orWhere('l_name', 'like', "%{$value}%")
+                                ->orWhere('phone', 'like', "%{$value}%");
                         }
                     });
                 });
-            }
-            $conversations = $conversations->orderBy('last_message_time', 'DESC')
+            })
+            ->orderBy('last_message_time', 'DESC')
             ->latest()
             ->paginate(8);
-        }else{
-            $conversations = [];
-        }
-
 
         if ($request->ajax()) {
-            // dd($conversations);
-
-            $view = view('vendor-views.messages.data',compact('conversations'))->render();
-            return response()->json(['html'=>$view]);
+            $view = view('vendor-views.messages.data', compact('conversations'))->render();
+            return response()->json(['html' => $view]);
         }
 
         return view('vendor-views.messages.index', compact('conversations'));
