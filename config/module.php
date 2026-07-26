@@ -2,7 +2,7 @@
 
 return [
     'module_type'=>[
-        'grocery', 'food', 'pharmacy', 'ecommerce','parcel','rental','ride-share'
+        'grocery', 'food', 'pharmacy', 'ecommerce','parcel','rental','ride-share','classify'
     ],
 
     'grocery'=>[
@@ -29,6 +29,7 @@ return [
         'generic_name'=>false,
         'description'=>'In this type, You can set delivery slot start after x minutes from current time, No available time for items and has stock for items.',
         'is_rental'=>false,
+        'is_classify'=>false,
     ],
 
     'food'=>[
@@ -55,6 +56,7 @@ return [
         'generic_name'=>false,
         'description'=>'In this type, you can set item available time, no stock management for items and has option to add add-on.',
         'is_rental'=>false,
+    'is_classify'=>false,
     ],
 
     'pharmacy'=>[
@@ -81,6 +83,7 @@ return [
         'generic_name'=>true,
         'description'=>'In this type, Customer can upload prescription when place order, No available time for items and has stock for items.',
         'is_rental'=>false,
+    'is_classify'=>false,
     ],
 
     'ecommerce'=>[
@@ -107,6 +110,7 @@ return [
         'generic_name'=>false,
         'description'=>'In this type, No opening and closing time for store, no available time for items and has stock for items.',
         'is_rental'=>false,
+    'is_classify'=>false,
     ],
 
     'parcel'=>[
@@ -133,6 +137,7 @@ return [
         'generic_name'=>false,
         'description'=>'',
         'is_rental'=>false,
+    'is_classify'=>false,
     ],
     'rental'=>[
         'order_status'=>['accepted'=>false],
@@ -158,6 +163,7 @@ return [
         'generic_name'=>false,
         'description'=>'',
         'is_rental'=>true,
+    'is_classify'=>false,
     ],
     'ride-share'=>[
         'order_status'=>['accepted'=>false],
@@ -183,5 +189,33 @@ return [
         'generic_name'=>false,
         'description'=>'',
         'is_rental'=>true,
+        'is_classify'=>false,
+    ],
+
+    'classify'=>[
+        'order_status'=>['accepted'=>false],
+        'order_place_to_schedule_interval'=>false,
+        'add_on'=>false,
+        'stock'=>false,
+        'veg_non_veg'=>false,
+        'unit'=>false,
+        'order_attachment'=>false,
+        'always_open'=>true,
+        'all_zone_service'=>false,
+        'item_available_time'=>false,
+        'show_restaurant_text'=>false,
+        'is_parcel'=>false,
+        'organic'=>false,
+        'cutlery'=>false,
+        'common_condition'=>false,
+        'nutrition'=>false,
+        'allergy'=>false,
+        'basic'=>false,
+        'halal'=>false,
+        'brand'=>false,
+        'generic_name'=>false,
+        'description'=>'Classified advertisements — listings with chat/call, no cart or checkout.',
+        'is_rental'=>false,
+        'is_classify'=>true,
     ],
 ];

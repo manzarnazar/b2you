@@ -82,6 +82,8 @@ $verifiedBadgePopupLabel = isset($moduleType) && $moduleType == 'rental' ? trans
 
     @if(isset($moduleType) && $moduleType == 'rental')
         @include("rental::provider.partials._sidebar_{$moduleType}")
+    @elseif(isset($moduleType) && $moduleType == 'classify')
+        @include('classify::vendor.partials._sidebar_classify')
     @else
         @include('layouts.vendor.partials._sidebar')
     @endif

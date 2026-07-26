@@ -85,7 +85,7 @@ $countryCode = strtolower($country ? $country : 'auto');
     @php($module_type = 'settings')
     @endif
 
-    @if(in_array($module_type, ['rental', 'ride-share']))
+    @if(in_array($module_type, ['rental', 'ride-share', 'classify']))
         @include("{$module_type}::admin.partials._sidebar_{$module_type}")
     @else
         @include("layouts.admin.partials._sidebar_{$module_type}")

@@ -1,0 +1,13 @@
+{
+    "name": "Classify",
+    "alias": "classify",
+    "description": "Classified advertisements module",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Classify\\Providers\\ClassifyServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

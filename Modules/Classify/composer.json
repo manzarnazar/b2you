@@ -1,0 +1,21 @@
+{
+    "name": "nwidart/classify",
+    "description": "Classified advertisements module for 6amMart",
+    "authors": [
+        {
+            "name": "B2You",
+            "email": "dev@b2you.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Classify\\": ""
+        }
+    }
+}

@@ -146,7 +146,17 @@ class Module extends Model
     }
     public function scopeWithoutAdditionalModules($query): mixed
     {
-        return $query->whereNotIn('module_type',  ['rental','ride-share','service']);
+        return $query->whereNotIn('module_type',  ['rental','ride-share','service','classify']);
+    }
+
+    public function scopeNotClassify($query): mixed
+    {
+        return $query->where('module_type', '!=', 'classify');
+    }
+
+    public function scopeClassify($query): mixed
+    {
+        return $query->where('module_type', 'classify');
     }
 
     public function scopeNotServiceAndRideShare($query)
