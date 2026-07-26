@@ -70,10 +70,35 @@
                         </ul>
                     </li>
 
-                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/store*') || Request::is('admin/vendor*') ? 'active' : '' }}">
-                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.store.list') }}">
-                            <i class="tio-poi nav-icon"></i>
-                            <span class="text-truncate">{{ translate('Stores') ?: 'Sellers' }}</span>
+                    <li class="nav-item">
+                        <small class="nav-subtitle">{{ translate('messages.store_management') ?: 'Store management' }}</small>
+                        <small class="tio-more-horizontal nav-subtitle-replacer"></small>
+                    </li>
+
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/store/pending-requests') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link"
+                           href="{{ route('admin.store.pending-requests') }}"
+                           title="{{ translate('messages.pending_requests') }}">
+                            <i class="tio-calendar-note nav-icon"></i>
+                            <span class="text-truncate text-capitalize">{{ translate('messages.new_stores') }}</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/store/add') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link"
+                           href="{{ route('admin.store.add') }}"
+                           title="{{ translate('messages.add_store') }}">
+                            <i class="tio-add-circle nav-icon"></i>
+                            <span class="text-truncate">{{ translate('messages.add_store') }}</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/store/list') || Request::is('admin/store/view/*') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link"
+                           href="{{ route('admin.store.list') }}"
+                           title="{{ translate('messages.stores_list') }}">
+                            <i class="tio-layout nav-icon"></i>
+                            <span class="text-truncate">{{ translate('messages.stores') }} {{ translate('list') }}</span>
                         </a>
                     </li>
 
