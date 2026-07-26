@@ -322,6 +322,12 @@ class DashboardController extends Controller
         if ($module_type == 'rental' && addon_published_status('Rental') == 0) {
             return view('errors.404');
         }
+        if ($module_type == 'classify' && addon_published_status('Classify') == 1) {
+            return redirect()->route('admin.classify.dashboard');
+        }
+        if ($module_type == 'classify' && addon_published_status('Classify') == 0) {
+            return view('errors.404');
+        }
         return view("admin-views.dashboard-{$module_type}", compact('data', 'total_sell', 'commission', 'delivery_commission', 'label', 'params', 'module_type'));
 
     }

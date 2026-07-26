@@ -29,9 +29,9 @@
                 </form>
 
                 <ul class="navbar-nav navbar-nav-lg nav-tabs">
-                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin') ? 'show active' : '' }}">
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin') || Request::is('admin/classify') ? 'show active' : '' }}">
                         <a class="js-navbar-vertical-aside-menu-link nav-link"
-                           href="{{ route('admin.dashboard') }}?module_id={{Config::get('module.current_module_id')}}">
+                           href="{{ route('admin.classify.dashboard') }}?module_id={{Config::get('module.current_module_id')}}">
                             <i class="tio-home-vs-1-outlined nav-icon"></i>
                             <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.dashboard') }}</span>
                         </a>
@@ -70,8 +70,8 @@
                         </ul>
                     </li>
 
-                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/vendor*') || Request::is('admin/store*') ? 'active' : '' }}">
-                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.vendor.list') }}">
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/store*') || Request::is('admin/vendor*') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.store.list') }}">
                             <i class="tio-poi nav-icon"></i>
                             <span class="text-truncate">{{ translate('Stores') ?: 'Sellers' }}</span>
                         </a>

@@ -1,12 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Classify\Http\Controllers\Web\Admin\DashboardController;
 use Modules\Classify\Http\Controllers\Web\Admin\ListingController;
 use Modules\Classify\Http\Controllers\Web\Admin\ReportController;
 use Modules\Classify\Http\Controllers\Web\Admin\SettingsController;
 
 Route::group(['middleware' => ['admin', 'current-module']], function () {
     Route::group(['prefix' => 'classify', 'as' => 'classify.'], function () {
+        Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
+
         Route::group(['prefix' => 'listings', 'as' => 'listings.'], function () {
             Route::get('/', [ListingController::class, 'index'])->name('index');
             Route::get('{id}', [ListingController::class, 'show'])->name('show');
