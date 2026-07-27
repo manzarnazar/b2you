@@ -12,6 +12,8 @@ Route::group(['middleware' => ['admin', 'current-module']], function () {
 
         Route::group(['prefix' => 'listings', 'as' => 'listings.'], function () {
             Route::get('/', [ListingController::class, 'index'])->name('index');
+            Route::get('{id}/edit', [ListingController::class, 'edit'])->name('edit');
+            Route::put('{id}', [ListingController::class, 'update'])->name('update');
             Route::get('{id}', [ListingController::class, 'show'])->name('show');
             Route::post('{id}/approve', [ListingController::class, 'approve'])->name('approve');
             Route::post('{id}/reject', [ListingController::class, 'reject'])->name('reject');

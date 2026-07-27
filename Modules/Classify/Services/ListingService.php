@@ -75,6 +75,17 @@ class ListingService
         });
     }
 
+    public function updateByAdmin(ClassifyListing $listing, array $data, $images = null): ClassifyListing
+    {
+        return DB::transaction(function () use ($listing, $data, $images) {
+            $listing->update($data);
+            if ($images !== null) {
+                $this->syncImages($listing, $images, true);
+            }
+            return $listing->fresh(['images', 'category', 'subCategory', 'store']);
+        });
+    }
+
     public function syncImages(ClassifyListing $listing, $images, bool $append = false): void
     {
         if (!$append) {

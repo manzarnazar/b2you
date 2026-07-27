@@ -13,6 +13,7 @@
             <div class="pl-2">
                 <h1 class="page-header-title mb-0">{{ $mod->module_name ?? 'Classify' }} {{ translate('messages.Dashboard') }}</h1>
                 <p class="page-header-text m-0">{{ translate('Manage classified listings, sellers, and reports.') }}</p>
+                <p class="text-muted small mt-1 mb-0">{{ translate('Add home carousel banners from Banners while the Classify module is selected.') }}</p>
             </div>
         </div>
     </div>

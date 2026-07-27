@@ -52,6 +52,7 @@
                         <td><span class="badge badge-soft-secondary">{{ $listing->status }}</span></td>
                         <td>
                             <a class="btn btn-sm btn-white" href="{{ route('admin.classify.listings.show', $listing->id) }}"><i class="tio-visible"></i></a>
+                            <a class="btn btn-sm btn-white" href="{{ route('admin.classify.listings.edit', $listing->id) }}"><i class="tio-edit"></i></a>
                             @if($listing->status === 'pending')
                                 <form action="{{ route('admin.classify.listings.approve', $listing->id) }}" method="post" class="d-inline">@csrf
                                     <button class="btn btn-sm btn-success"><i class="tio-checkmark"></i></button>

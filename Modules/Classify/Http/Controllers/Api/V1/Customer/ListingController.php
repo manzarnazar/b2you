@@ -22,7 +22,15 @@ class ListingController extends Controller
         $moduleId = config('module.current_module_data')['id'] ?? null;
         $zoneIds = $request->header('zoneId') ? json_decode($request->header('zoneId'), true) : null;
 
-        $listings = ClassifyListing::with(['store', 'category', 'images'])
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
+        $radiusKm = $request->radius_km ?? 50;
+        $hasValidCoords = is_numeric($latitude) && is_numeric($longitude)
+            && $latitude >= -90 && $latitude <= 90
+            && $longitude >= -180 && $longitude <= 180;
+
+        $query = ClassifyListing::query()
+            ->with(['store', 'category', 'images'])
             ->published()
             ->when($moduleId, fn ($q) => $q->ofModule($moduleId))
             ->when($zoneIds, fn ($q) => $q->whereIn('zone_id', (array) $zoneIds))
@@ -39,11 +47,21 @@ class ListingController extends Controller
                         ->orWhere('description', 'like', "%{$request->search}%")
                         ->orWhere('address', 'like', "%{$request->search}%");
                 });
-            })
-            ->orderByDesc('is_premium')
-            ->orderByDesc('is_featured')
-            ->latest('published_at')
-            ->paginate($request->limit ?? 25);
+            });
+
+        if ($hasValidCoords) {
+            $query->near($latitude, $longitude, $radiusKm)
+                ->orderByDesc('is_premium')
+                ->orderByDesc('is_featured')
+                ->orderBy('distance')
+                ->latest('published_at');
+        } else {
+            $query->orderByDesc('is_premium')
+                ->orderByDesc('is_featured')
+                ->latest('published_at');
+        }
+
+        $listings = $query->paginate($request->limit ?? 25);
 
         return response()->json($listings, 200);
     }

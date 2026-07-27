@@ -50,6 +50,43 @@ class ListingController extends Controller
         return view('classify::admin.listings.show', compact('listing'));
     }
 
+    public function edit($id)
+    {
+        $listing = ClassifyListing::with(['images', 'store'])->findOrFail($id);
+        $moduleId = $listing->module_id ?? config('module.current_module_data')['id'];
+        $categories = Category::where(['position' => 0, 'module_id' => $moduleId, 'status' => 1])->get();
+        return view('classify::admin.listings.edit', compact('listing', 'categories'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $listing = ClassifyListing::with('images')->findOrFail($id);
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'condition' => 'required|in:new,used,refurbished',
+            'category_id' => 'required|exists:categories,id',
+            'status' => 'nullable|in:draft,pending,published,rejected,sold,expired,archived',
+            'images.*' => 'nullable|image',
+        ]);
+
+        $data = $request->only([
+            'title', 'description', 'price', 'condition', 'category_id', 'sub_category_id',
+            'phone', 'address', 'latitude', 'longitude', 'status',
+        ]);
+        $data['is_negotiable'] = $request->boolean('is_negotiable');
+        if ($request->filled('status') && $request->status === 'published') {
+            $data['is_approved'] = 1;
+            if (!$listing->published_at) {
+                $data['published_at'] = now();
+            }
+        }
+        $images = $request->hasFile('images') ? $request->file('images') : null;
+        $this->listingService->updateByAdmin($listing, $data, $images);
+        Toastr::success(translate('messages.updated_successfully') ?: 'Updated successfully');
+        return redirect()->route('admin.classify.listings.show', $listing->id);
+    }
+
     public function approve($id)
     {
         $listing = ClassifyListing::findOrFail($id);

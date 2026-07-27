@@ -7,6 +7,7 @@
     <div class="page-header d-flex justify-content-between align-items-center">
         <h1 class="page-header-title">{{ $listing->title }}</h1>
         <a href="{{ route('admin.classify.listings.index') }}" class="btn btn-secondary">{{ translate('Back') }}</a>
+        <a href="{{ route('admin.classify.listings.edit', $listing->id) }}" class="btn btn-primary">{{ translate('Edit') }}</a>
     </div>
 
     <div class="row">

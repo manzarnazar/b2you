@@ -123,6 +123,27 @@ class ClassifyListing extends Model
         return $query->where('status', $status);
     }
 
+    public function scopeNear($query, $latitude, $longitude, $radiusKm = 50)
+    {
+        $lat = (float) $latitude;
+        $lng = (float) $longitude;
+        $radiusMeters = (float) $radiusKm * 1000;
+
+        return $query
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->where('latitude', '!=', '')
+            ->where('longitude', '!=', '')
+            ->selectRaw(
+                'classify_listings.*, ST_Distance_Sphere(point(classify_listings.longitude, classify_listings.latitude), point(?, ?)) as distance',
+                [$lng, $lat]
+            )
+            ->whereRaw(
+                'ST_Distance_Sphere(point(classify_listings.longitude, classify_listings.latitude), point(?, ?)) <= ?',
+                [$lng, $lat, $radiusMeters]
+            );
+    }
+
     public function getPrimaryImageFullUrlAttribute()
     {
         $primary = $this->images->firstWhere('is_primary', true) ?? $this->images->first();

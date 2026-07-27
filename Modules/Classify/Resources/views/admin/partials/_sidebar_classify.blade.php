@@ -49,6 +49,17 @@
                         </a>
                     </li>
 
+                    @if (\App\CentralLogics\Helpers::module_permission_check('banner'))
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/banner*') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link"
+                           href="{{ route('admin.banner.add-new') }}"
+                           title="{{ translate('messages.banners') }}">
+                            <i class="tio-image nav-icon"></i>
+                            <span class="text-truncate">{{ translate('messages.banners') }}</span>
+                        </a>
+                    </li>
+                    @endif
+
                     <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/category*') ? 'active' : '' }}">
                         <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:">
                             <i class="tio-category-outlined nav-icon"></i>
