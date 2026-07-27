@@ -131,7 +131,7 @@ class ListingController extends Controller
         $listing = ClassifyListing::with('images')->ofStore($store->id)->findOrFail($id);
         $this->listingService->delete($listing);
         Toastr::success(translate('messages.deleted_successfully') ?: 'Deleted');
-        return back();
+        return redirect()->route('vendor.classify.listings.index');
     }
 
     public function sold($id)

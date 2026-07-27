@@ -17,6 +17,15 @@
                 @include('classify::admin.listings._form', ['listing' => $listing, 'categories' => $categories])
                 <button type="submit" class="btn btn-primary">{{ translate('messages.update') ?: 'Update' }}</button>
             </form>
+            <hr class="my-4">
+            <form action="{{ route('admin.classify.listings.destroy', $listing->id) }}" method="post"
+                  onsubmit="return confirm('{{ translate('Delete this listing permanently? This cannot be undone.') }}');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="tio-delete"></i> {{ translate('Delete listing') }}
+                </button>
+            </form>
         </div>
     </div>
 </div>

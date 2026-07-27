@@ -13,6 +13,16 @@
                 @csrf
                 @include('classify::vendor.listings._form', ['listing' => $listing])
                 <button class="btn btn-primary">{{ translate('Update') }}</button>
+                <a href="{{ route('vendor.classify.listings.index') }}" class="btn btn-white">{{ translate('Cancel') }}</a>
+            </form>
+            <hr class="my-4">
+            <form action="{{ route('vendor.classify.listings.destroy', $listing->id) }}" method="post"
+                  onsubmit="return confirm('{{ translate('Delete this listing permanently? This cannot be undone.') }}');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="tio-delete"></i> {{ translate('Delete listing') }}
+                </button>
             </form>
         </div>
     </div>

@@ -123,6 +123,15 @@
                                    class="btn btn-sm btn-white" title="{{ translate('Edit') }}">
                                     <i class="tio-edit"></i>
                                 </a>
+                                <form action="{{ route('vendor.classify.listings.destroy', $listing->id) }}" method="post"
+                                      class="d-inline"
+                                      onsubmit="return confirm('{{ translate('Delete this listing permanently?') }}');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-white text-danger" title="{{ translate('Delete') }}">
+                                        <i class="tio-delete"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>

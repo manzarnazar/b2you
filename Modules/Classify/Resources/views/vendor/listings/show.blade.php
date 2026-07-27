@@ -64,6 +64,14 @@
                             <i class="tio-archive"></i> {{ translate('Archive') }}
                         </button>
                     </form>
+                    <form action="{{ route('vendor.classify.listings.destroy', $listing->id) }}" method="post" class="d-inline"
+                          onsubmit="return confirm('{{ translate('Delete this listing permanently? This cannot be undone.') }}');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="tio-delete"></i> {{ translate('Delete') }}
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

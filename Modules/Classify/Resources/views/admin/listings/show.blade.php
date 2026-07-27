@@ -56,8 +56,11 @@
                         <input type="hidden" name="days" value="7">
                         <button class="btn btn-warning btn-block">{{ $listing->is_premium ? 'Remove Premium' : 'Make Premium' }}</button>
                     </form>
-                    <form action="{{ route('admin.classify.listings.destroy', $listing->id) }}" method="post" onsubmit="return confirm('Delete?')">@csrf @method('DELETE')
-                        <button class="btn btn-outline-danger btn-block">{{ translate('Delete') }}</button>
+                    <form action="{{ route('admin.classify.listings.destroy', $listing->id) }}" method="post"
+                          onsubmit="return confirm('{{ translate('Delete this listing permanently? This cannot be undone.') }}');">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-danger btn-block">{{ translate('Delete listing') }}</button>
                     </form>
                 </div>
             </div>

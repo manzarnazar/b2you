@@ -5,8 +5,11 @@ namespace Modules\Classify\Services;
 use App\CentralLogics\Helpers;
 use App\Models\BusinessSetting;
 use Illuminate\Support\Facades\DB;
+use Modules\Classify\Entities\ClassifyConversation;
 use Modules\Classify\Entities\ClassifyListing;
+use Modules\Classify\Entities\ClassifyListingFavorite;
 use Modules\Classify\Entities\ClassifyListingImage;
+use Modules\Classify\Entities\ClassifyMessage;
 
 class ListingService
 {
@@ -148,10 +151,21 @@ class ListingService
 
     public function delete(ClassifyListing $listing): void
     {
-        foreach ($listing->images as $img) {
-            Helpers::check_and_delete('classify/', $img->image);
-        }
-        $listing->images()->delete();
-        $listing->delete();
+        DB::transaction(function () use ($listing) {
+            foreach ($listing->images as $img) {
+                Helpers::check_and_delete('classify/', $img->image);
+            }
+            $listing->images()->delete();
+
+            $conversationIds = ClassifyConversation::where('listing_id', $listing->id)->pluck('id');
+            if ($conversationIds->isNotEmpty()) {
+                ClassifyMessage::whereIn('conversation_id', $conversationIds)->delete();
+                ClassifyConversation::whereIn('id', $conversationIds)->delete();
+            }
+
+            ClassifyListingFavorite::where('listing_id', $listing->id)->delete();
+
+            $listing->delete();
+        });
     }
 }

@@ -58,6 +58,14 @@
                                     <button class="btn btn-sm btn-success"><i class="tio-checkmark"></i></button>
                                 </form>
                             @endif
+                            <form action="{{ route('admin.classify.listings.destroy', $listing->id) }}" method="post" class="d-inline"
+                                  onsubmit="return confirm('{{ translate('Delete this listing permanently?') }}');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-white text-danger" title="{{ translate('Delete') }}">
+                                    <i class="tio-delete"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 @empty
