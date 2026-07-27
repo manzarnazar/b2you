@@ -31,7 +31,7 @@ class ListingController extends Controller
             })
             ->latest();
 
-        $listings = $query->paginate(config('default_pagination'));
+        $listings = $query->paginate(config('default_pagination'))->withQueryString();
         $statusCounts = [
             'all' => ClassifyListing::count(),
             'pending' => ClassifyListing::where('status', 'pending')->count(),

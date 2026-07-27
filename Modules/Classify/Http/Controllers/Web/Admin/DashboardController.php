@@ -29,7 +29,7 @@ class DashboardController extends Controller
             'sellers' => Store::when($moduleId, fn ($q) => $q->where('module_id', $moduleId))->count(),
         ];
 
-        $recent = ClassifyListing::with(['store', 'category'])
+        $recent = ClassifyListing::with(['store', 'category', 'images'])
             ->when($moduleId, fn ($q) => $q->where('module_id', $moduleId))
             ->latest()
             ->limit(10)
