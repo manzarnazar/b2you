@@ -23,6 +23,14 @@ class ListingController extends Controller
         return Helpers::get_store_data();
     }
 
+    protected function classifyParentCategories(int $moduleId)
+    {
+        return Category::where(['position' => 0, 'module_id' => $moduleId, 'status' => 1])
+            ->with(['childes' => fn ($q) => $q->where('status', 1)->orderBy('name')])
+            ->orderBy('name')
+            ->get();
+    }
+
     public function index(Request $request)
     {
         $store = $this->currentStore();
@@ -49,7 +57,7 @@ class ListingController extends Controller
     public function create()
     {
         $store = $this->currentStore();
-        $categories = Category::where(['position' => 0, 'module_id' => $store->module_id, 'status' => 1])->get();
+        $categories = $this->classifyParentCategories($store->module_id);
         return view('classify::vendor.listings.create', compact('categories'));
     }
 
@@ -99,7 +107,7 @@ class ListingController extends Controller
     {
         $store = $this->currentStore();
         $listing = ClassifyListing::with('images')->ofStore($store->id)->findOrFail($id);
-        $categories = Category::where(['position' => 0, 'module_id' => $store->module_id, 'status' => 1])->get();
+        $categories = $this->classifyParentCategories($store->module_id);
         return view('classify::vendor.listings.edit', compact('listing', 'categories'));
     }
 

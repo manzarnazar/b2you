@@ -54,7 +54,10 @@ class ListingController extends Controller
     {
         $listing = ClassifyListing::with(['images', 'store'])->findOrFail($id);
         $moduleId = $listing->module_id ?? config('module.current_module_data')['id'];
-        $categories = Category::where(['position' => 0, 'module_id' => $moduleId, 'status' => 1])->get();
+        $categories = Category::where(['position' => 0, 'module_id' => $moduleId, 'status' => 1])
+            ->with(['childes' => fn ($q) => $q->where('status', 1)->orderBy('name')])
+            ->orderBy('name')
+            ->get();
         return view('classify::admin.listings.edit', compact('listing', 'categories'));
     }
 

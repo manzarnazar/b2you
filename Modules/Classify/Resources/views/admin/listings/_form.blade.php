@@ -25,17 +25,14 @@
     </div>
     <div class="col-md-6 form-group">
         <label>{{ translate('Category') }}</label>
-        <select name="category_id" class="form-control" required>
+        <select name="category_id" id="classify_category_id" class="form-control" required>
             <option value="">{{ translate('Select') }}</option>
             @foreach($categories as $category)
                 <option value="{{ $category->id }}" {{ old('category_id', $listing->category_id ?? '') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
             @endforeach
         </select>
     </div>
-    <div class="col-md-3 form-group">
-        <label>{{ translate('Sub Category') }}</label>
-        <input type="number" name="sub_category_id" class="form-control" value="{{ old('sub_category_id', $listing->sub_category_id ?? '') }}" placeholder="Optional">
-    </div>
+    @include('classify::partials._sub_category_field', ['wrapperClass' => 'col-md-3'])
     <div class="col-md-6 form-group">
         <label>{{ translate('Phone') }}</label>
         <input type="text" name="phone" class="form-control" value="{{ old('phone', $listing->phone ?? '') }}">
