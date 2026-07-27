@@ -38,12 +38,6 @@
                             <span class="text-truncate">{{ translate('Classified chats') ?: 'Classified chats' }}</span>
                         </a>
                     </li>
-                    <li class="navbar-vertical-aside-has-menu {{ Request::is('vendor-panel/message*') ? 'active' : '' }}">
-                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('vendor.message.list') }}">
-                            <i class="tio-chat-outlined nav-icon"></i>
-                            <span class="text-truncate">{{ translate('messages.chat') }} ({{ translate('Orders') ?: 'Orders' }})</span>
-                        </a>
-                    </li>
                     <li class="navbar-vertical-aside-has-menu {{ Request::is('vendor-panel/profile*') || Request::is('vendor-panel/store*') ? 'active' : '' }}">
                         <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('vendor.shop.view') }}">
                             <i class="tio-shop nav-icon"></i>
