@@ -123,13 +123,16 @@ class ClassifyListing extends Model
         return $query->where('status', $status);
     }
 
-    public function scopeNear($query, $latitude, $longitude, $radiusKm = 50)
+    /**
+     * Annotate rows with distance from a point. Optionally hard-filter by radius_km.
+     * Pass null/0 radius to sort by proximity without hiding distant listings.
+     */
+    public function scopeNear($query, $latitude, $longitude, $radiusKm = null)
     {
         $lat = (float) $latitude;
         $lng = (float) $longitude;
-        $radiusMeters = (float) $radiusKm * 1000;
 
-        return $query
+        $query
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->where('latitude', '!=', '')
@@ -137,11 +140,17 @@ class ClassifyListing extends Model
             ->selectRaw(
                 'classify_listings.*, ST_Distance_Sphere(point(classify_listings.longitude, classify_listings.latitude), point(?, ?)) as distance',
                 [$lng, $lat]
-            )
-            ->whereRaw(
+            );
+
+        if ($radiusKm !== null && $radiusKm !== '' && (float) $radiusKm > 0) {
+            $radiusMeters = (float) $radiusKm * 1000;
+            $query->whereRaw(
                 'ST_Distance_Sphere(point(classify_listings.longitude, classify_listings.latitude), point(?, ?)) <= ?',
                 [$lng, $lat, $radiusMeters]
             );
+        }
+
+        return $query;
     }
 
     public function getPrimaryImageFullUrlAttribute()

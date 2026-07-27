@@ -24,7 +24,9 @@ class ListingController extends Controller
 
         $latitude = $request->latitude;
         $longitude = $request->longitude;
-        $radiusKm = $request->radius_km ?? 50;
+        // Only hard-filter by radius when the client explicitly sends radius_km.
+        // Otherwise location is used for distance sorting so all published listings remain visible.
+        $radiusKm = $request->filled('radius_km') ? $request->radius_km : null;
         $hasValidCoords = is_numeric($latitude) && is_numeric($longitude)
             && $latitude >= -90 && $latitude <= 90
             && $longitude >= -180 && $longitude <= 180;
