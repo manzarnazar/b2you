@@ -14,8 +14,8 @@
             <table class="table table-hover table-borderless table-thead-bordered">
                 <thead class="thead-light">
                     <tr>
-                        <th>{{ translate('Listing') }}</th>
                         <th>{{ translate('Buyer') }}</th>
+                        <th>{{ translate('About listing') ?: 'About listing' }}</th>
                         <th>{{ translate('Last message') }}</th>
                         <th>{{ translate('Unread') }}</th>
                         <th></th>
@@ -24,8 +24,8 @@
                 <tbody>
                     @forelse($conversations as $conv)
                         <tr>
-                            <td>{{ $conv->listing?->title ?? '-' }}</td>
                             <td>{{ trim(($conv->customer?->f_name ?? '') . ' ' . ($conv->customer?->l_name ?? '')) ?: '-' }}</td>
+                            <td>{{ $conv->listing?->title ?? '—' }}</td>
                             <td class="text-truncate" style="max-width:280px">{{ $conv->lastMessage?->message ?? '-' }}</td>
                             <td>
                                 @if($conv->unread_vendor > 0)

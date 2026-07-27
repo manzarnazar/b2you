@@ -7,10 +7,15 @@
     <div class="page-header">
         <div class="row align-items-center">
             <div class="col-sm mb-2 mb-sm-0">
-                <h1 class="page-header-title">{{ $conversation->listing?->title ?? translate('Chat') }}</h1>
+                <h1 class="page-header-title">
+                    {{ trim(($conversation->customer?->f_name ?? '') . ' ' . ($conversation->customer?->l_name ?? '')) ?: (translate('Chat') ?: 'Chat') }}
+                </h1>
                 <p class="mb-0 text-muted">
-                    {{ translate('Buyer') }}:
-                    {{ trim(($conversation->customer?->f_name ?? '') . ' ' . ($conversation->customer?->l_name ?? '')) }}
+                    @if($conversation->listing)
+                        {{ translate('About listing') ?: 'About listing' }}: {{ $conversation->listing->title }}
+                    @else
+                        {{ translate('Classified chat') ?: 'Classified chat' }}
+                    @endif
                 </p>
             </div>
             <div class="col-sm-auto">

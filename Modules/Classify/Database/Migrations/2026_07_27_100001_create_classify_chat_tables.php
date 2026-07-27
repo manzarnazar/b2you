@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('classify_conversations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('listing_id')->constrained('classify_listings')->cascadeOnDelete();
+            $table->foreignId('listing_id')->nullable()->constrained('classify_listings')->nullOnDelete();
             $table->foreignId('module_id')->nullable()->index();
             $table->foreignId('store_id')->index();
             $table->foreignId('vendor_id')->index();
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedInteger('unread_vendor')->default(0);
             $table->timestamps();
 
-            $table->unique(['listing_id', 'customer_id'], 'classify_conv_listing_customer_unique');
+            $table->unique(['store_id', 'customer_id'], 'classify_conv_store_customer_unique');
         });
 
         Schema::create('classify_messages', function (Blueprint $table) {

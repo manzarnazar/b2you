@@ -10,7 +10,6 @@ use Modules\Classify\Entities\ClassifyListing;
 use Modules\Classify\Entities\ClassifyListingFavorite;
 use Modules\Classify\Entities\ClassifyListingFieldValue;
 use Modules\Classify\Entities\ClassifyListingImage;
-use Modules\Classify\Entities\ClassifyMessage;
 use Illuminate\Support\Collection;
 
 class ListingService
@@ -170,11 +169,8 @@ class ListingService
             }
             $listing->images()->delete();
 
-            $conversationIds = ClassifyConversation::where('listing_id', $listing->id)->pluck('id');
-            if ($conversationIds->isNotEmpty()) {
-                ClassifyMessage::whereIn('conversation_id', $conversationIds)->delete();
-                ClassifyConversation::whereIn('id', $conversationIds)->delete();
-            }
+            // Shared buyer–seller threads must survive listing deletion.
+            ClassifyConversation::where('listing_id', $listing->id)->update(['listing_id' => null]);
 
             ClassifyListingFavorite::where('listing_id', $listing->id)->delete();
 

@@ -18,19 +18,33 @@ class ClassifyChatService
             throw new \InvalidArgumentException('Listing has no seller');
         }
 
-        return ClassifyConversation::firstOrCreate(
+        $conversation = ClassifyConversation::firstOrCreate(
             [
-                'listing_id' => $listing->id,
+                'store_id' => $listing->store_id,
                 'customer_id' => $customer->id,
             ],
             [
+                'listing_id' => $listing->id,
                 'module_id' => $listing->module_id,
-                'store_id' => $listing->store_id,
                 'vendor_id' => $vendorId,
                 'unread_customer' => 0,
                 'unread_vendor' => 0,
             ]
         );
+
+        // Keep latest listing as context without creating a new thread.
+        if ((int) $conversation->listing_id !== (int) $listing->id) {
+            $conversation->listing_id = $listing->id;
+            if (!$conversation->module_id) {
+                $conversation->module_id = $listing->module_id;
+            }
+            if (!$conversation->vendor_id) {
+                $conversation->vendor_id = $vendorId;
+            }
+            $conversation->save();
+        }
+
+        return $conversation;
     }
 
     public function sendMessage(
@@ -60,7 +74,7 @@ class ClassifyChatService
             $conversation->save();
 
             $isFirst = ClassifyMessage::where('conversation_id', $conversation->id)->count() === 1;
-            if ($isFirst) {
+            if ($isFirst && $conversation->listing_id) {
                 ClassifyListing::where('id', $conversation->listing_id)->increment('chats_count');
             }
 
