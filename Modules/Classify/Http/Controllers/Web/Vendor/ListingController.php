@@ -26,13 +26,24 @@ class ListingController extends Controller
     public function index(Request $request)
     {
         $store = $this->currentStore();
+        $baseQuery = ClassifyListing::ofStore($store->id);
+
+        $statusCounts = [
+            'all' => (clone $baseQuery)->count(),
+            'published' => (clone $baseQuery)->where('status', 'published')->count(),
+            'pending' => (clone $baseQuery)->where('status', 'pending')->count(),
+            'sold' => (clone $baseQuery)->where('status', 'sold')->count(),
+            'archived' => (clone $baseQuery)->where('status', 'archived')->count(),
+        ];
+
         $listings = ClassifyListing::with(['category', 'images'])
             ->ofStore($store->id)
             ->when($request->status, fn ($q) => $q->where('status', $request->status))
-            ->latest()
-            ->paginate(config('default_pagination'));
+            ->latest('updated_at')
+            ->paginate(config('default_pagination'))
+            ->withQueryString();
 
-        return view('classify::vendor.listings.index', compact('listings'));
+        return view('classify::vendor.listings.index', compact('listings', 'statusCounts'));
     }
 
     public function create()
