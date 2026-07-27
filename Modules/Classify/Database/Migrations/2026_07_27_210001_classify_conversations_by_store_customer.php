@@ -60,13 +60,7 @@ return new class extends Migration
             DB::table('classify_conversations')->whereIn('id', $duplicateIds)->delete();
         }
 
-        $indexRows = DB::select("SHOW INDEX FROM classify_conversations WHERE Key_name = 'classify_conv_listing_customer_unique'");
-        if (!empty($indexRows)) {
-            Schema::table('classify_conversations', function (Blueprint $table) {
-                $table->dropUnique('classify_conv_listing_customer_unique');
-            });
-        }
-
+        // Drop listing_id FK first — MySQL may require the unique index while the FK exists.
         $fkRows = DB::select("
             SELECT CONSTRAINT_NAME
             FROM information_schema.KEY_COLUMN_USAGE
@@ -80,6 +74,22 @@ return new class extends Migration
             if ($name) {
                 DB::statement("ALTER TABLE classify_conversations DROP FOREIGN KEY `{$name}`");
             }
+        }
+
+        $indexRows = DB::select("SHOW INDEX FROM classify_conversations WHERE Key_name = 'classify_conv_listing_customer_unique'");
+        if (!empty($indexRows)) {
+            Schema::table('classify_conversations', function (Blueprint $table) {
+                $table->dropUnique('classify_conv_listing_customer_unique');
+            });
+        }
+
+        // Keep a plain index on listing_id for lookups after the composite unique is gone.
+        $listingIndex = DB::select("SHOW INDEX FROM classify_conversations WHERE Key_name = 'classify_conversations_listing_id_foreign'");
+        $listingIndexAlt = DB::select("SHOW INDEX FROM classify_conversations WHERE Column_name = 'listing_id' AND Non_unique = 1");
+        if (empty($listingIndex) && empty($listingIndexAlt)) {
+            Schema::table('classify_conversations', function (Blueprint $table) {
+                $table->index('listing_id');
+            });
         }
 
         DB::statement('ALTER TABLE classify_conversations MODIFY listing_id BIGINT UNSIGNED NULL');
