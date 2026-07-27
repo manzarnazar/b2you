@@ -32,10 +32,16 @@
                             <span class="text-truncate">{{ translate('Add Listing') ?: 'Add Listing' }}</span>
                         </a>
                     </li>
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('vendor-panel/classify/chats*') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('vendor.classify.chats.index') }}">
+                            <i class="tio-chat nav-icon"></i>
+                            <span class="text-truncate">{{ translate('Classified chats') ?: 'Classified chats' }}</span>
+                        </a>
+                    </li>
                     <li class="navbar-vertical-aside-has-menu {{ Request::is('vendor-panel/message*') ? 'active' : '' }}">
                         <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('vendor.message.list') }}">
-                            <i class="tio-chat nav-icon"></i>
-                            <span class="text-truncate">{{ translate('messages.chat') }}</span>
+                            <i class="tio-chat-outlined nav-icon"></i>
+                            <span class="text-truncate">{{ translate('messages.chat') }} ({{ translate('Orders') ?: 'Orders' }})</span>
                         </a>
                     </li>
                     <li class="navbar-vertical-aside-has-menu {{ Request::is('vendor-panel/profile*') || Request::is('vendor-panel/store*') ? 'active' : '' }}">

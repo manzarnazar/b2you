@@ -4,11 +4,7 @@ namespace Modules\Classify\Http\Controllers\Api\V1\Customer;
 
 use App\CentralLogics\Helpers;
 use App\Http\Controllers\Controller;
-use App\Models\Conversation;
-use App\Models\Message;
 use App\Models\Store;
-use App\Models\UserInfo;
-use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Modules\Classify\Entities\ClassifyListing;
@@ -193,113 +189,5 @@ class ListingController extends Controller
         ]);
 
         return response()->json(['message' => 'Report submitted', 'report' => $report], 200);
-    }
-
-    public function chat(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'listing_id' => 'required|exists:classify_listings,id',
-            'message' => 'nullable|string|max:1000',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
-        }
-
-        try {
-            $listing = ClassifyListing::with('store')->findOrFail($request->listing_id);
-            $vendorId = $listing->vendor_id ?: $listing->store?->vendor_id;
-            $vendor = $vendorId ? Vendor::find($vendorId) : null;
-            if (!$vendor) {
-                return response()->json(['errors' => [['code' => 'vendor', 'message' => 'Seller not found']]], 404);
-            }
-
-            $user = $request->user();
-            $sender = UserInfo::where('user_id', $user->id)->first();
-            if (!$sender) {
-                $sender = new UserInfo();
-                $sender->user_id = $user->id;
-                $sender->f_name = $user->f_name;
-                $sender->l_name = $user->l_name;
-                $sender->phone = $user->phone;
-                $sender->email = $user->email;
-                $sender->image = $user->image;
-                $sender->save();
-            }
-
-            $receiver = UserInfo::where('vendor_id', $vendor->id)->first();
-            if (!$receiver) {
-                $receiver = new UserInfo();
-                $receiver->vendor_id = $vendor->id;
-                $receiver->f_name = $listing->store?->name ?: ($vendor->f_name ?: 'Seller');
-                $receiver->l_name = $vendor->l_name ?: '';
-                $receiver->phone = $vendor->phone;
-                $receiver->email = $vendor->email;
-                $receiver->image = $listing->store?->logo;
-                $receiver->save();
-            }
-
-            $conversation = Conversation::WhereConversation($sender->id, $receiver->id)->first();
-            if (!$conversation) {
-                $conversation = new Conversation();
-                $conversation->sender_id = $sender->id;
-                $conversation->sender_type = 'customer';
-                $conversation->receiver_id = $receiver->id;
-                $conversation->receiver_type = 'vendor';
-                $conversation->unread_message_count = 0;
-                $conversation->last_message_time = now()->toDateTimeString();
-                $conversation->save();
-            }
-
-            $body = $request->message ?: ('Interested in: ' . $listing->title);
-            $message = new Message();
-            $message->conversation_id = $conversation->id;
-            $message->sender_id = $sender->id;
-            $message->message = $body . "\n[listing_id:{$listing->id}]";
-            $message->save();
-
-            $conversation->unread_message_count = ($conversation->unread_message_count ?: 0) + 1;
-            $conversation->last_message_id = $message->id;
-            $conversation->last_message_time = now()->toDateTimeString();
-            $conversation->save();
-
-            $listing->increment('chats_count');
-
-            try {
-                $data = [
-                    'title' => translate('messages.message') ?: 'New message',
-                    'description' => $body,
-                    'order_id' => '',
-                    'image' => '',
-                    'type' => 'message',
-                    'conversation_id' => $conversation->id,
-                    'listing_id' => $listing->id,
-                    'sender_type' => 'user',
-                ];
-                if (!empty($vendor->firebase_token)) {
-                    Helpers::send_push_notif_to_device($vendor->firebase_token, $data);
-                }
-                if ($listing->store_id) {
-                    Helpers::send_push_notif_to_topic($data, "store_panel_{$listing->store_id}_message", 'message');
-                }
-            } catch (\Throwable $e) {
-                // Push notification failures should not block chat.
-            }
-
-            return response()->json([
-                'message' => 'Chat started',
-                'conversation_id' => $conversation->id,
-                'listing_id' => $listing->id,
-                'vendor_id' => $vendor->id,
-            ], 200);
-        } catch (\Throwable $e) {
-            \Log::error('Classify chat failed: ' . $e->getMessage(), [
-                'listing_id' => $request->listing_id,
-                'user_id' => $request->user()?->id,
-            ]);
-
-            return response()->json([
-                'errors' => [['code' => 'chat', 'message' => 'Unable to start chat. Please try again.']],
-            ], 500);
-        }
     }
 }

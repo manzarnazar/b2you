@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Classify\Http\Controllers\Web\Vendor\ChatController;
 use Modules\Classify\Http\Controllers\Web\Vendor\ListingController;
 
 Route::group(['middleware' => ['vendor', 'current-module']], function () {
@@ -15,5 +16,9 @@ Route::group(['middleware' => ['vendor', 'current-module']], function () {
         Route::post('listings/{id}/sold', [ListingController::class, 'sold'])->name('listings.sold');
         Route::post('listings/{id}/renew', [ListingController::class, 'renew'])->name('listings.renew');
         Route::post('listings/{id}/archive', [ListingController::class, 'archive'])->name('listings.archive');
+
+        Route::get('chats', [ChatController::class, 'index'])->name('chats.index');
+        Route::get('chats/{id}', [ChatController::class, 'show'])->name('chats.show');
+        Route::post('chats/{id}/send', [ChatController::class, 'send'])->name('chats.send');
     });
 });

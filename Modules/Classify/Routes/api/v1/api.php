@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Modules\Classify\Http\Controllers\Api\V1\Admin\ListingController as AdminListingController;
 use Modules\Classify\Http\Controllers\Api\V1\Admin\ReportController as AdminReportController;
 use Modules\Classify\Http\Controllers\Api\V1\Admin\SettingsController as AdminSettingsController;
+use Modules\Classify\Http\Controllers\Api\V1\Customer\ChatController as CustomerChatController;
 use Modules\Classify\Http\Controllers\Api\V1\Customer\ListingController as CustomerListingController;
+use Modules\Classify\Http\Controllers\Api\V1\Vendor\ChatController as VendorChatController;
 use Modules\Classify\Http\Controllers\Api\V1\Vendor\ListingController as VendorListingController;
 
 // Customer / public classify APIs
@@ -19,7 +21,13 @@ Route::group(['prefix' => 'classify', 'middleware' => ['localization', 'module-c
         Route::post('favorite', [CustomerListingController::class, 'addFavorite']);
         Route::delete('favorite', [CustomerListingController::class, 'removeFavorite']);
         Route::post('report', [CustomerListingController::class, 'report']);
-        Route::post('chat', [CustomerListingController::class, 'chat']);
+
+        Route::get('chats', [CustomerChatController::class, 'conversations']);
+        Route::post('chat/start', [CustomerChatController::class, 'start']);
+        Route::get('chat/{id}/messages', [CustomerChatController::class, 'messages']);
+        Route::post('chat/{id}/messages', [CustomerChatController::class, 'send']);
+        // Legacy alias
+        Route::post('chat', [CustomerChatController::class, 'start']);
     });
 });
 
@@ -37,6 +45,10 @@ Route::group(['prefix' => 'vendor/classify', 'middleware' => ['vendor.api', 'act
     Route::post('listing/{id}/renew', [VendorListingController::class, 'renew']);
     Route::post('listing/{id}/archive', [VendorListingController::class, 'archive']);
     Route::get('listing/{id}/stats', [VendorListingController::class, 'stats']);
+
+    Route::get('chats', [VendorChatController::class, 'conversations']);
+    Route::get('chat/{id}/messages', [VendorChatController::class, 'messages']);
+    Route::post('chat/{id}/messages', [VendorChatController::class, 'send']);
 });
 
 // Admin classify APIs (token-style if used; primarily Blade uses web routes)
