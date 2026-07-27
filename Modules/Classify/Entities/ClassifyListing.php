@@ -99,6 +99,11 @@ class ClassifyListing extends Model
         return $this->hasMany(ClassifyListingReport::class, 'listing_id');
     }
 
+    public function fieldValues(): HasMany
+    {
+        return $this->hasMany(ClassifyListingFieldValue::class, 'listing_id');
+    }
+
     public function scopePublished($query)
     {
         return $query->where('status', 'published')

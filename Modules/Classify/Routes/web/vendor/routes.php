@@ -8,6 +8,7 @@ Route::group(['middleware' => ['vendor', 'current-module']], function () {
     Route::group(['prefix' => 'classify', 'as' => 'classify.'], function () {
         Route::get('listings', [ListingController::class, 'index'])->name('listings.index');
         Route::get('listings/create', [ListingController::class, 'create'])->name('listings.create');
+        Route::get('listings/category-fields', [ListingController::class, 'categoryFields'])->name('listings.category-fields');
         Route::post('listings', [ListingController::class, 'store'])->name('listings.store');
         Route::get('listings/{id}', [ListingController::class, 'show'])->name('listings.show');
         Route::get('listings/{id}/edit', [ListingController::class, 'edit'])->name('listings.edit');

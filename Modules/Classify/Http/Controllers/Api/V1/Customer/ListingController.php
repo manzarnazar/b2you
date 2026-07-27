@@ -10,9 +10,12 @@ use Illuminate\Support\Facades\Validator;
 use Modules\Classify\Entities\ClassifyListing;
 use Modules\Classify\Entities\ClassifyListingFavorite;
 use Modules\Classify\Entities\ClassifyListingReport;
+use Modules\Classify\Services\CategoryFieldService;
 
 class ListingController extends Controller
 {
+    public function __construct(protected CategoryFieldService $categoryFieldService) {}
+
     public function index(Request $request)
     {
         $moduleId = config('module.current_module_data')['id'] ?? null;
@@ -66,7 +69,7 @@ class ListingController extends Controller
 
     public function show(Request $request, $id)
     {
-        $listing = ClassifyListing::with(['store', 'category', 'subCategory', 'images', 'vendor'])
+        $listing = ClassifyListing::with(['store', 'category', 'subCategory', 'images', 'vendor', 'fieldValues.field'])
             ->published()
             ->findOrFail($id);
 
@@ -81,6 +84,7 @@ class ListingController extends Controller
 
         $data = $listing->toArray();
         $data['is_favorite'] = $isFavorite;
+        $data['custom_fields'] = $this->categoryFieldService->displayArray($listing);
 
         return response()->json($data, 200);
     }

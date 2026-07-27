@@ -121,6 +121,23 @@
 
                     <h5 class="mb-2">{{ translate('Description') }}</h5>
                     <div class="text-body" style="white-space: pre-line;">{{ $listing->description ?: '—' }}</div>
+
+                    @if(!empty($customFieldsDisplay))
+                        <hr class="my-4">
+                        <h5 class="mb-3">{{ translate('Category details') ?: 'Category details' }}</h5>
+                        <dl class="row mb-0">
+                            @foreach($customFieldsDisplay as $cf)
+                                <dt class="col-sm-4 text-muted">{{ $cf['label'] }}</dt>
+                                <dd class="col-sm-8">
+                                    @if(($cf['type'] ?? '') === 'file' && !empty($cf['file_full_url']))
+                                        <a href="{{ $cf['file_full_url'] }}" target="_blank" rel="noopener">{{ $cf['display_value'] }}</a>
+                                    @else
+                                        {{ $cf['display_value'] }}
+                                    @endif
+                                </dd>
+                            @endforeach
+                        </dl>
+                    @endif
                 </div>
             </div>
 

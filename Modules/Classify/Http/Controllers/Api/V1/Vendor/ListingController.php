@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Modules\Classify\Entities\ClassifyListing;
+use Modules\Classify\Services\CategoryFieldService;
 use Modules\Classify\Services\ListingService;
 use Modules\Classify\Services\ListingStatsService;
 
@@ -15,7 +17,8 @@ class ListingController extends Controller
 {
     public function __construct(
         protected ListingService $listingService,
-        protected ListingStatsService $statsService
+        protected ListingStatsService $statsService,
+        protected CategoryFieldService $categoryFieldService
     ) {}
 
     public function index(Request $request)
@@ -29,6 +32,18 @@ class ListingController extends Controller
             ->paginate($request->limit ?? 25);
 
         return response()->json($listings, 200);
+    }
+
+    public function categoryFields(Request $request)
+    {
+        $fields = $this->categoryFieldService->resolveFields(
+            $request->filled('category_id') ? (int) $request->category_id : null,
+            $request->filled('sub_category_id') ? (int) $request->sub_category_id : null
+        );
+
+        return response()->json([
+            'fields' => $fields->map->toDefinitionArray()->values(),
+        ], 200);
     }
 
     public function store(Request $request)
@@ -58,13 +73,25 @@ class ListingController extends Controller
             return response()->json(['errors' => [['code' => 'module', 'message' => 'Store is not a Classify module store']]], 403);
         }
 
+        $fields = $this->categoryFieldService->resolveFields(
+            (int) $request->category_id,
+            $request->filled('sub_category_id') ? (int) $request->sub_category_id : null
+        );
+        [$custom, $fileMap] = $this->categoryFieldService->extractRequestValues($request);
+
+        try {
+            $normalized = $this->categoryFieldService->validateAndNormalize($fields, $custom, $fileMap);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => Helpers::error_processor($e->validator)], 403);
+        }
+
         $data = [
             'module_id' => $store->module_id,
             'store_id' => $store->id,
             'vendor_id' => $request->vendor->id,
             'zone_id' => $store->zone_id,
             'category_id' => $request->category_id,
-            'sub_category_id' => $request->sub_category_id,
+            'sub_category_id' => $request->sub_category_id ?: null,
             'title' => $request->title,
             'description' => $request->description,
             'price' => $request->price,
@@ -77,15 +104,17 @@ class ListingController extends Controller
         ];
 
         $images = $request->file('images', []);
-        $listing = $this->listingService->create($data, $images);
+        $listing = $this->listingService->create($data, $images, $fields, $normalized);
+        $payload = $listing->toArray();
+        $payload['custom_fields'] = $this->categoryFieldService->displayArray($listing);
 
-        return response()->json(['message' => 'Listing created', 'listing' => $listing], 200);
+        return response()->json(['message' => 'Listing created', 'listing' => $payload], 200);
     }
 
     public function update(Request $request, $id)
     {
         $store = $request->vendor->stores[0];
-        $listing = ClassifyListing::with('images')->ofStore($store->id)->findOrFail($id);
+        $listing = ClassifyListing::with(['images', 'fieldValues.field'])->ofStore($store->id)->findOrFail($id);
 
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|required|string|max:255',
@@ -107,18 +136,42 @@ class ListingController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
+        $categoryId = (int) ($request->category_id ?: $listing->category_id);
+        $subCategoryId = $request->has('sub_category_id')
+            ? ($request->sub_category_id ? (int) $request->sub_category_id : null)
+            : ($listing->sub_category_id ? (int) $listing->sub_category_id : null);
+
+        $fields = $this->categoryFieldService->resolveFields($categoryId, $subCategoryId);
+        [$custom, $fileMap] = $this->categoryFieldService->extractRequestValues($request);
+
+        try {
+            $normalized = $this->categoryFieldService->validateAndNormalize(
+                $fields,
+                $custom,
+                $fileMap,
+                $listing->fieldValues->mapWithKeys(fn ($r) => [$r->field_id => $r->value])->all()
+            );
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => Helpers::error_processor($e->validator)], 403);
+        }
+
         $data = $request->only([
             'title', 'description', 'price', 'condition', 'category_id', 'sub_category_id',
             'phone', 'address', 'latitude', 'longitude',
         ]);
+        if ($request->has('sub_category_id') && !$request->sub_category_id) {
+            $data['sub_category_id'] = null;
+        }
         if ($request->has('is_negotiable')) {
             $data['is_negotiable'] = $request->boolean('is_negotiable');
         }
 
         $images = $request->hasFile('images') ? $request->file('images') : null;
-        $listing = $this->listingService->update($listing, $data, $images);
+        $listing = $this->listingService->update($listing, $data, $images, $fields, $normalized);
+        $payload = $listing->toArray();
+        $payload['custom_fields'] = $this->categoryFieldService->displayArray($listing);
 
-        return response()->json(['message' => 'Listing updated', 'listing' => $listing], 200);
+        return response()->json(['message' => 'Listing updated', 'listing' => $payload], 200);
     }
 
     public function destroy(Request $request, $id)
@@ -172,8 +225,16 @@ class ListingController extends Controller
     public function show(Request $request, $id)
     {
         $store = $request->vendor->stores[0];
-        $listing = ClassifyListing::with(['category', 'subCategory', 'images'])->ofStore($store->id)->findOrFail($id);
-        return response()->json($listing, 200);
+        $listing = ClassifyListing::with(['category', 'subCategory', 'images', 'fieldValues.field'])
+            ->ofStore($store->id)
+            ->findOrFail($id);
+        $payload = $listing->toArray();
+        $payload['custom_fields'] = $this->categoryFieldService->displayArray($listing);
+        $payload['custom_field_values'] = $listing->fieldValues->mapWithKeys(function ($row) {
+            return [$row->field_id => $row->decodedValue()];
+        });
+
+        return response()->json($payload, 200);
     }
 
     public function categories(Request $request)

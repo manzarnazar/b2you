@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Modules\Classify\Entities\ClassifyListing;
+use Modules\Classify\Services\CategoryFieldService;
 use Modules\Classify\Services\ListingService;
 use Modules\Classify\Services\ListingStatsService;
 
@@ -15,7 +17,8 @@ class ListingController extends Controller
 {
     public function __construct(
         protected ListingService $listingService,
-        protected ListingStatsService $statsService
+        protected ListingStatsService $statsService,
+        protected CategoryFieldService $categoryFieldService
     ) {}
 
     protected function currentStore()
@@ -58,7 +61,21 @@ class ListingController extends Controller
     {
         $store = $this->currentStore();
         $categories = $this->classifyParentCategories($store->module_id);
-        return view('classify::vendor.listings.create', compact('categories'));
+        $customFields = collect();
+        $customFieldValues = [];
+        return view('classify::vendor.listings.create', compact('categories', 'customFields', 'customFieldValues'));
+    }
+
+    public function categoryFields(Request $request)
+    {
+        $fields = $this->categoryFieldService->resolveFields(
+            $request->filled('category_id') ? (int) $request->category_id : null,
+            $request->filled('sub_category_id') ? (int) $request->sub_category_id : null
+        );
+
+        return response()->json([
+            'fields' => $fields->map->toDefinitionArray()->values(),
+        ]);
     }
 
     public function store(Request $request)
@@ -71,6 +88,18 @@ class ListingController extends Controller
             'images.*' => 'nullable|image',
         ]);
 
+        $fields = $this->categoryFieldService->resolveFields(
+            (int) $request->category_id,
+            $request->filled('sub_category_id') ? (int) $request->sub_category_id : null
+        );
+        [$custom, $files] = $this->categoryFieldService->extractRequestValues($request);
+
+        try {
+            $normalized = $this->categoryFieldService->validateAndNormalize($fields, $custom, $files);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        }
+
         $store = $this->currentStore();
         $data = [
             'module_id' => $store->module_id,
@@ -78,7 +107,7 @@ class ListingController extends Controller
             'vendor_id' => $store->vendor_id,
             'zone_id' => $store->zone_id,
             'category_id' => $request->category_id,
-            'sub_category_id' => $request->sub_category_id,
+            'sub_category_id' => $request->sub_category_id ?: null,
             'title' => $request->title,
             'description' => $request->description,
             'price' => $request->price,
@@ -90,7 +119,7 @@ class ListingController extends Controller
             'longitude' => $request->longitude ?: $store->longitude,
         ];
 
-        $this->listingService->create($data, $request->file('images', []));
+        $this->listingService->create($data, $request->file('images', []), $fields, $normalized);
         Toastr::success(translate('messages.listing_created') ?: 'Listing created');
         return redirect()->route('vendor.classify.listings.index');
     }
@@ -98,23 +127,34 @@ class ListingController extends Controller
     public function show($id)
     {
         $store = $this->currentStore();
-        $listing = ClassifyListing::with(['category', 'subCategory', 'images'])->ofStore($store->id)->findOrFail($id);
+        $listing = ClassifyListing::with(['category', 'subCategory', 'images', 'fieldValues.field'])
+            ->ofStore($store->id)
+            ->findOrFail($id);
         $stats = $this->statsService->forListing($listing);
-        return view('classify::vendor.listings.show', compact('listing', 'stats'));
+        $customFieldsDisplay = $this->categoryFieldService->displayArray($listing);
+        return view('classify::vendor.listings.show', compact('listing', 'stats', 'customFieldsDisplay'));
     }
 
     public function edit($id)
     {
         $store = $this->currentStore();
-        $listing = ClassifyListing::with('images')->ofStore($store->id)->findOrFail($id);
+        $listing = ClassifyListing::with(['images', 'fieldValues'])->ofStore($store->id)->findOrFail($id);
         $categories = $this->classifyParentCategories($store->module_id);
-        return view('classify::vendor.listings.edit', compact('listing', 'categories'));
+        $customFields = $this->categoryFieldService->resolveFields(
+            (int) $listing->category_id,
+            $listing->sub_category_id ? (int) $listing->sub_category_id : null
+        );
+        $customFieldValues = $listing->fieldValues->mapWithKeys(function ($row) {
+            return [$row->field_id => $row->decodedValue()];
+        })->all();
+
+        return view('classify::vendor.listings.edit', compact('listing', 'categories', 'customFields', 'customFieldValues'));
     }
 
     public function update(Request $request, $id)
     {
         $store = $this->currentStore();
-        $listing = ClassifyListing::with('images')->ofStore($store->id)->findOrFail($id);
+        $listing = ClassifyListing::with(['images', 'fieldValues.field'])->ofStore($store->id)->findOrFail($id);
         $request->validate([
             'title' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
@@ -122,13 +162,26 @@ class ListingController extends Controller
             'category_id' => 'required|exists:categories,id',
         ]);
 
+        $fields = $this->categoryFieldService->resolveFields(
+            (int) $request->category_id,
+            $request->filled('sub_category_id') ? (int) $request->sub_category_id : null
+        );
+        [$custom, $files] = $this->categoryFieldService->extractRequestValues($request);
+
+        try {
+            $normalized = $this->categoryFieldService->validateAndNormalize($fields, $custom, $files, $listing->fieldValues->mapWithKeys(fn ($r) => [$r->field_id => $r->value])->all());
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        }
+
         $data = $request->only([
             'title', 'description', 'price', 'condition', 'category_id', 'sub_category_id',
             'phone', 'address', 'latitude', 'longitude',
         ]);
+        $data['sub_category_id'] = $request->sub_category_id ?: null;
         $data['is_negotiable'] = $request->boolean('is_negotiable');
         $images = $request->hasFile('images') ? $request->file('images') : null;
-        $this->listingService->update($listing, $data, $images);
+        $this->listingService->update($listing, $data, $images, $fields, $normalized);
         Toastr::success(translate('messages.updated_successfully') ?: 'Updated');
         return redirect()->route('vendor.classify.listings.index');
     }

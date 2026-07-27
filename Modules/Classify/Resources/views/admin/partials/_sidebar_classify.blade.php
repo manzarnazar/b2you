@@ -65,7 +65,7 @@
                             <i class="tio-category-outlined nav-icon"></i>
                             <span class="text-truncate">{{ translate('Categories') }}</span>
                         </a>
-                        <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ Request::is('admin/category*') ? 'block' : 'none' }}">
+                        <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ Request::is('admin/category*') || Request::is('admin/classify/category-fields*') ? 'block' : 'none' }}">
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('admin.category.add',['position'=>0]) }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
@@ -76,6 +76,13 @@
                                 <a class="nav-link" href="{{ route('admin.category.add',['position'=>1]) }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
                                     <span class="text-truncate">{{ translate('Sub Category') }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ Request::is('admin/classify/category-fields*') ? 'active' : '' }}"
+                                   href="{{ route('admin.classify.category-fields.index') }}">
+                                    <span class="tio-circle nav-indicator-icon"></span>
+                                    <span class="text-truncate">{{ translate('Category Fields') ?: 'Category Fields' }}</span>
                                 </a>
                             </li>
                         </ul>

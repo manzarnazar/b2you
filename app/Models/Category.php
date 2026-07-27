@@ -97,6 +97,11 @@ class Category extends Model
         return $this->hasMany(Category::class, 'parent_id');
     }
 
+    public function classifyFields(): HasMany
+    {
+        return $this->hasMany(\Modules\Classify\Entities\ClassifyCategoryField::class, 'category_id');
+    }
+
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id');

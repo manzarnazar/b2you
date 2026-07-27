@@ -25,6 +25,7 @@
         </select>
     </div>
     @include('classify::partials._sub_category_field', ['wrapperClass' => 'col-md-6'])
+    @include('classify::partials._dynamic_fields')
     <div class="col-md-6 form-group">
         <label>{{ translate('Phone') }}</label>
         <input type="text" name="phone" class="form-control" value="{{ old('phone', $listing->phone ?? '') }}">

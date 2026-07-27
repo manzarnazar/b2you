@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Classify\Http\Controllers\Web\Admin\CategoryFieldController;
 use Modules\Classify\Http\Controllers\Web\Admin\DashboardController;
 use Modules\Classify\Http\Controllers\Web\Admin\ListingController;
 use Modules\Classify\Http\Controllers\Web\Admin\ReportController;
@@ -20,6 +21,16 @@ Route::group(['middleware' => ['admin', 'current-module']], function () {
             Route::post('{id}/feature', [ListingController::class, 'feature'])->name('feature');
             Route::post('{id}/premium', [ListingController::class, 'premium'])->name('premium');
             Route::delete('{id}', [ListingController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::group(['prefix' => 'category-fields', 'as' => 'category-fields.'], function () {
+            Route::get('/', [CategoryFieldController::class, 'index'])->name('index');
+            Route::get('{categoryId}', [CategoryFieldController::class, 'show'])->name('show');
+            Route::post('{categoryId}', [CategoryFieldController::class, 'store'])->name('store');
+            Route::put('{categoryId}/{fieldId}', [CategoryFieldController::class, 'update'])->name('update');
+            Route::delete('{categoryId}/{fieldId}', [CategoryFieldController::class, 'destroy'])->name('destroy');
+            Route::get('{categoryId}/{fieldId}/toggle', [CategoryFieldController::class, 'toggle'])->name('toggle');
+            Route::get('{categoryId}/{fieldId}/move', [CategoryFieldController::class, 'move'])->name('move');
         });
 
         Route::get('settings', [SettingsController::class, 'index'])->name('settings');

@@ -322,6 +322,13 @@
                                                 data-target="#offcanvas__categoryBtn">
                                                 <i class="tio-edit"></i>
                                             </a>
+                                            @if (Config::get('module.current_module_type') == 'classify')
+                                                <a class="btn action-btn btn-outline-info"
+                                                   href="{{ route('admin.classify.category-fields.show', $category['id']) }}"
+                                                   title="{{ translate('Custom fields') ?: 'Custom fields' }}">
+                                                    <i class="tio-poi"></i>
+                                                </a>
+                                            @endif
                                             <a class="btn action-btn btn--danger btn-outline-danger form-alert"
                                                 href="javascript:" data-id="category-{{ $category['id'] }}"
                                                 data-message="{{ translate('Want to delete this category') }}"

@@ -170,6 +170,10 @@
     </div>
     <div
         class="align-items-center bg-white bottom-0 d-flex gap-3 justify-content-center mt-auto offcanvas-footer p-3 position-sticky">
+        @if (Config::get('module.current_module_type') == 'classify')
+            <a href="{{ route('admin.classify.category-fields.show', $category['id']) }}"
+               class="btn w-100 btn-outline-info h--40px">{{ translate('Custom fields') ?: 'Custom fields' }}</a>
+        @endif
         <button type="button"
                 class="btn w-100 btn--secondary offcanvas-close h--40px">{{ translate('Cancel') }}</button>
         <button type="submit" class="btn w-100 btn--primary h--40px">{{ translate('Update') }}</button>

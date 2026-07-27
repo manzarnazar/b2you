@@ -8,11 +8,15 @@ use Illuminate\Support\Facades\DB;
 use Modules\Classify\Entities\ClassifyConversation;
 use Modules\Classify\Entities\ClassifyListing;
 use Modules\Classify\Entities\ClassifyListingFavorite;
+use Modules\Classify\Entities\ClassifyListingFieldValue;
 use Modules\Classify\Entities\ClassifyListingImage;
 use Modules\Classify\Entities\ClassifyMessage;
+use Illuminate\Support\Collection;
 
 class ListingService
 {
+    public function __construct(protected CategoryFieldService $categoryFieldService) {}
+
     public function getSetting(string $key, $default = null)
     {
         $row = BusinessSetting::where('key', $key)->first();
@@ -42,9 +46,9 @@ class ListingService
         return (bool) $this->getSetting('classify_auto_expiry', 1);
     }
 
-    public function create(array $data, $images = []): ClassifyListing
+    public function create(array $data, $images = [], ?Collection $fields = null, array $fieldValues = []): ClassifyListing
     {
-        return DB::transaction(function () use ($data, $images) {
+        return DB::transaction(function () use ($data, $images, $fields, $fieldValues) {
             $approvalRequired = $this->approvalRequired();
             $duration = $this->listingDurationDays();
 
@@ -59,13 +63,16 @@ class ListingService
 
             $listing = ClassifyListing::create($data);
             $this->syncImages($listing, $images);
-            return $listing->fresh(['images', 'category', 'subCategory', 'store']);
+            if ($fields !== null) {
+                $this->categoryFieldService->syncFieldValues($listing, $fields, $fieldValues);
+            }
+            return $listing->fresh(['images', 'category', 'subCategory', 'store', 'fieldValues.field']);
         });
     }
 
-    public function update(ClassifyListing $listing, array $data, $images = null): ClassifyListing
+    public function update(ClassifyListing $listing, array $data, $images = null, ?Collection $fields = null, array $fieldValues = []): ClassifyListing
     {
-        return DB::transaction(function () use ($listing, $data, $images) {
+        return DB::transaction(function () use ($listing, $data, $images, $fields, $fieldValues) {
             if ($this->approvalRequired() && $listing->status === 'published') {
                 $data['status'] = 'pending';
                 $data['is_approved'] = 0;
@@ -74,18 +81,24 @@ class ListingService
             if ($images !== null) {
                 $this->syncImages($listing, $images, true);
             }
-            return $listing->fresh(['images', 'category', 'subCategory', 'store']);
+            if ($fields !== null) {
+                $this->categoryFieldService->syncFieldValues($listing, $fields, $fieldValues);
+            }
+            return $listing->fresh(['images', 'category', 'subCategory', 'store', 'fieldValues.field']);
         });
     }
 
-    public function updateByAdmin(ClassifyListing $listing, array $data, $images = null): ClassifyListing
+    public function updateByAdmin(ClassifyListing $listing, array $data, $images = null, ?Collection $fields = null, array $fieldValues = []): ClassifyListing
     {
-        return DB::transaction(function () use ($listing, $data, $images) {
+        return DB::transaction(function () use ($listing, $data, $images, $fields, $fieldValues) {
             $listing->update($data);
             if ($images !== null) {
                 $this->syncImages($listing, $images, true);
             }
-            return $listing->fresh(['images', 'category', 'subCategory', 'store']);
+            if ($fields !== null) {
+                $this->categoryFieldService->syncFieldValues($listing, $fields, $fieldValues);
+            }
+            return $listing->fresh(['images', 'category', 'subCategory', 'store', 'fieldValues.field']);
         });
     }
 
@@ -164,6 +177,12 @@ class ListingService
             }
 
             ClassifyListingFavorite::where('listing_id', $listing->id)->delete();
+
+            $fieldValues = ClassifyListingFieldValue::with('field')->where('listing_id', $listing->id)->get();
+            foreach ($fieldValues as $row) {
+                $this->categoryFieldService->deleteFileIfNeeded($row);
+            }
+            ClassifyListingFieldValue::where('listing_id', $listing->id)->delete();
 
             $listing->delete();
         });

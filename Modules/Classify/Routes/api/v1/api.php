@@ -35,6 +35,7 @@ Route::group(['prefix' => 'classify', 'middleware' => ['localization', 'module-c
 Route::group(['prefix' => 'vendor/classify', 'middleware' => ['vendor.api', 'actch:vendor_app']], function () {
     Route::get('listings', [VendorListingController::class, 'index']);
     Route::get('categories', [VendorListingController::class, 'categories']);
+    Route::get('category-fields', [VendorListingController::class, 'categoryFields']);
     Route::post('listing', [VendorListingController::class, 'store']);
     Route::get('listing/{id}', [VendorListingController::class, 'show']);
     Route::put('listing/{id}', [VendorListingController::class, 'update']);
