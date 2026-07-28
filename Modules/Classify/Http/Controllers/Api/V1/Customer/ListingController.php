@@ -16,6 +16,14 @@ class ListingController extends Controller
 {
     public function __construct(protected CategoryFieldService $categoryFieldService) {}
 
+    /** Resolve logged-in customer on public classify routes (Bearer token, no auth middleware). */
+    protected function customerUserId(Request $request): ?int
+    {
+        $user = $request->user('api');
+
+        return $user ? (int) $user->id : null;
+    }
+
     public function index(Request $request)
     {
         $moduleId = config('module.current_module_data')['id'] ?? null;
@@ -64,6 +72,20 @@ class ListingController extends Controller
 
         $listings = $query->paginate($request->limit ?? 25);
 
+        $favoriteIds = collect();
+        $userId = $this->customerUserId($request);
+        if ($userId) {
+            $favoriteIds = ClassifyListingFavorite::where('user_id', $userId)
+                ->whereIn('listing_id', $listings->getCollection()->pluck('id'))
+                ->pluck('listing_id');
+        }
+
+        $listings->getCollection()->transform(function ($listing) use ($favoriteIds) {
+            $arr = $listing->toArray();
+            $arr['is_favorite'] = $favoriteIds->contains($listing->id);
+            return $arr;
+        });
+
         return response()->json($listings, 200);
     }
 
@@ -75,12 +97,12 @@ class ListingController extends Controller
 
         $listing->increment('views_count');
 
-        $isFavorite = false;
-        if ($request->user()) {
-            $isFavorite = ClassifyListingFavorite::where('user_id', $request->user()->id)
+        $userId = $this->customerUserId($request);
+        $isFavorite = $userId
+            ? ClassifyListingFavorite::where('user_id', $userId)
                 ->where('listing_id', $listing->id)
-                ->exists();
-        }
+                ->exists()
+            : false;
 
         $data = $listing->toArray();
         $data['is_favorite'] = $isFavorite;
@@ -89,7 +111,7 @@ class ListingController extends Controller
         return response()->json($data, 200);
     }
 
-    public function similar($id)
+    public function similar(Request $request, $id)
     {
         $listing = ClassifyListing::published()->findOrFail($id);
         $similar = ClassifyListing::with(['store', 'images', 'category'])
@@ -102,7 +124,21 @@ class ListingController extends Controller
             ->limit(12)
             ->get();
 
-        return response()->json($similar, 200);
+        $favoriteIds = collect();
+        $userId = $this->customerUserId($request);
+        if ($userId) {
+            $favoriteIds = ClassifyListingFavorite::where('user_id', $userId)
+                ->whereIn('listing_id', $similar->pluck('id'))
+                ->pluck('listing_id');
+        }
+
+        $payload = $similar->map(function ($item) use ($favoriteIds) {
+            $arr = $item->toArray();
+            $arr['is_favorite'] = $favoriteIds->contains($item->id);
+            return $arr;
+        });
+
+        return response()->json($payload, 200);
     }
 
     public function seller($storeId)
@@ -169,6 +205,12 @@ class ListingController extends Controller
             ->published()
             ->latest()
             ->paginate($request->limit ?? 25);
+
+        $listings->getCollection()->transform(function ($listing) {
+            $arr = $listing->toArray();
+            $arr['is_favorite'] = true;
+            return $arr;
+        });
 
         return response()->json($listings, 200);
     }

@@ -86,58 +86,71 @@ class PasswordResetController extends Controller
                 return response()->json(['message' => translate('messages.Use_test_OTP')], 200);
             }
 
-            $is_sms_active= Setting::whereJsonContains('live_values->status','1')->where('settings_type', 'sms_config')->exists();
-            if($is_sms_active ){
-                $response =null;
-                $published_status =0;
+            if ($request->verification_method === 'phone') {
+                $is_sms_active = Setting::whereJsonContains('live_values->status', '1')
+                    ->where('settings_type', 'sms_config')
+                    ->exists();
+
+                if (!$is_sms_active) {
+                    return response()->json([
+                        'errors' => [
+                            ['code' => 'otp', 'message' => translate('messages.failed_to_send_otp')]
+                        ]
+                    ], 403);
+                }
+
+                $response = null;
+                $published_status = 0;
                 $payment_published_status = config('get_payment_publish_status');
                 if (isset($payment_published_status[0]['is_published'])) {
                     $published_status = $payment_published_status[0]['is_published'];
                 }
 
-                if($published_status == 1){
-                    $response = SmsGateway::send($request['phone'],$token);
-                }else{
-                    $response = SMS_module::send($request['phone'],$token);
-                }
-
-                if($response == 'success'){
-                    return response()->json(['message' => translate('messages.Otp_Successfully_Sent_To_Your_Phone')], 200);
+                if ($published_status == 1) {
+                    $response = SmsGateway::send($request['phone'], $token);
                 } else {
-                    return response()->json([
-                        'errors' => [
-                            ['code' => 'otp', 'message' => translate('messages.failed_to_send_sms')]
-                    ]], 403);
+                    $response = SMS_module::send($request['phone'], $token);
                 }
-            }
-            elseif(config('mail.status')){
-                try {
-                    $mailResponse=null;
-                        if (Helpers::get_mail_status('forget_password_mail_status_user') == '1' && $customer['email']) {
-                            Mail::to($customer?->getRawOriginal('email'))->send(new UserPasswordResetMail($token,$customer['f_name']));
-                            $mailResponse='success';
-                        }
-                } catch (\Throwable $th) {
-                        $mailResponse=null;
-                        info($th->getMessage());
-                    }
 
-                    if ($mailResponse == 'success') {
-                        return response()->json(['message' => translate('messages.Otp_Successfully_Sent_To_Your_Mail')], 200);
-                    } else  {
-                        return response()->json([
-                            'errors' => [
-                                ['code' => 'otp', 'message' => translate('messages.failed_to_send_mail')]
-                        ]], 403);
+                if ($response == 'success') {
+                    return response()->json(['message' => translate('messages.Otp_Successfully_Sent_To_Your_Phone')], 200);
+                }
+
+                return response()->json([
+                    'errors' => [
+                        ['code' => 'otp', 'message' => translate('messages.failed_to_send_sms')]
+                    ]
+                ], 403);
+            }
+
+            if ($request->verification_method === 'email' && config('mail.status')) {
+                try {
+                    $mailResponse = null;
+                    if (Helpers::get_mail_status('forget_password_mail_status_user') == '1' && $customer['email']) {
+                        Mail::to($customer?->getRawOriginal('email'))->send(new UserPasswordResetMail($token, $customer['f_name']));
+                        $mailResponse = 'success';
                     }
+                } catch (\Throwable $th) {
+                    $mailResponse = null;
+                    info($th->getMessage());
                 }
-                else
-                {
-                    return response()->json([
-                        'errors' => [
-                            ['code' => 'otp', 'message' => translate('messages.failed_to_send_otp')]
-                    ]], 403);
+
+                if ($mailResponse == 'success') {
+                    return response()->json(['message' => translate('messages.Otp_Successfully_Sent_To_Your_Mail')], 200);
                 }
+
+                return response()->json([
+                    'errors' => [
+                        ['code' => 'otp', 'message' => translate('messages.failed_to_send_mail')]
+                    ]
+                ], 403);
+            }
+
+            return response()->json([
+                'errors' => [
+                    ['code' => 'otp', 'message' => translate('messages.failed_to_send_otp')]
+                ]
+            ], 403);
 
         }
         return response()->json(['errors' => [
