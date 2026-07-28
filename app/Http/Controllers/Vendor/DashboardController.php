@@ -12,14 +12,25 @@ use App\Models\OrderTransaction;
 use Illuminate\Support\Facades\DB;
 use Modules\Rental\Entities\Trips;
 use App\Http\Controllers\Controller;
+use Modules\Classify\Entities\ClassifyListing;
+use Modules\Classify\Entities\ClassifyConversation;
 
 class DashboardController extends Controller
 {
     public function dashboard(Request $request)
     {
-        if(Helpers::get_store_data()->module_type == 'rental'){
+        $store = Helpers::get_store_data();
+        if($store->module_type == 'rental'){
             return to_route('vendor.providerDashboard');
 
+        }
+
+        if ($this->isClassifyStore($store)) {
+            $classifyDashboardData = $this->buildClassifyDashboardData($store);
+            return view('vendor-views.dashboard', [
+                'isClassifyDashboard' => true,
+                'classifyDashboardData' => $classifyDashboardData,
+            ]);
         }
         $params = [
             'statistics_type' => $request['statistics_type'] ?? 'overall'
@@ -71,6 +82,91 @@ class DashboardController extends Controller
         }
 
         return view('vendor-views.dashboard', compact('data', 'earning', 'commission', 'params','out_of_stock_count','item'));
+    }
+
+    protected function isClassifyStore($store): bool
+    {
+        return data_get($store, 'module.module_type') === 'classify'
+            || data_get($store, 'module_type') === 'classify';
+    }
+
+    protected function buildClassifyDashboardData($store): array
+    {
+        $storeId = (int) $store->id;
+        $vendor = auth('vendor')->user();
+        $vendorName = trim((string) ($vendor?->f_name ?? ''));
+        $hour = (int) now()->format('H');
+        $greeting = $hour < 12 ? 'Good Morning' : ($hour < 18 ? 'Good Afternoon' : 'Good Evening');
+
+        $statusCounts = ClassifyListing::query()
+            ->where('store_id', $storeId)
+            ->select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $metrics = ClassifyListing::query()
+            ->where('store_id', $storeId)
+            ->selectRaw('COALESCE(SUM(views_count),0) as total_views, COALESCE(SUM(favorites_count),0) as total_favorites, COALESCE(SUM(chats_count),0) as total_chats')
+            ->first();
+
+        $activeListingsCount = (int) ($statusCounts->get('published', 0));
+
+        $recentListings = ClassifyListing::query()
+            ->with(['images'])
+            ->where('store_id', $storeId)
+            ->latest()
+            ->take(3)
+            ->get();
+
+        $topPerformers = ClassifyListing::query()
+            ->where('store_id', $storeId)
+            ->orderByDesc('views_count')
+            ->orderByDesc('favorites_count')
+            ->orderByDesc('chats_count')
+            ->take(5)
+            ->get(['id', 'title', 'views_count', 'favorites_count', 'chats_count', 'status']);
+
+        $recentConversations = ClassifyConversation::query()
+            ->with(['customer:id,f_name,l_name', 'lastMessage:id,conversation_id,message,created_at'])
+            ->where('store_id', $storeId)
+            ->orderByDesc('last_message_at')
+            ->take(2)
+            ->get();
+
+        $recentChats = $recentConversations->map(function ($conversation) {
+            $customerName = trim((string) (($conversation->customer?->f_name ?? '') . ' ' . ($conversation->customer?->l_name ?? '')));
+            return [
+                'customer_name' => $customerName ?: 'Customer',
+                'message' => $conversation->lastMessage?->message ?: 'New conversation started',
+            ];
+        });
+
+        return [
+            'greeting' => $greeting,
+            'vendor_name' => $vendorName ?: 'Seller',
+            'active_listings' => $activeListingsCount,
+            'overview' => [
+                'active' => $activeListingsCount,
+                'pending' => (int) ($statusCounts->get('pending', 0)),
+                'sold' => (int) ($statusCounts->get('sold', 0)),
+                'expired' => (int) ($statusCounts->get('expired', 0)),
+            ],
+            'performance' => [
+                'views' => (int) ($metrics?->total_views ?? 0),
+                'favorites' => (int) ($metrics?->total_favorites ?? 0),
+                'chats_started' => (int) ($metrics?->total_chats ?? 0),
+            ],
+            'status' => [
+                'published' => $activeListingsCount,
+                'pending' => (int) ($statusCounts->get('pending', 0)),
+                'rejected' => (int) ($statusCounts->get('rejected', 0)),
+                'expired' => (int) ($statusCounts->get('expired', 0)),
+                'archived' => (int) ($statusCounts->get('archived', 0)),
+            ],
+            'recent_listings' => $recentListings,
+            'top_performers' => $topPerformers,
+            'recent_chats' => $recentChats,
+        ];
     }
 
     public function store_data()

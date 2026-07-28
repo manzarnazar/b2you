@@ -8,7 +8,9 @@
 
 @section('content')
     <div class="content container-fluid">
-
+        @if(!empty($isClassifyDashboard))
+            @include('vendor-views.partials._classify-dashboard', ['dashboard' => $classifyDashboardData ?? []])
+        @else
 
          @if(\App\CentralLogics\Helpers::employee_module_permission_check('dashboard'))
         <!-- Page Header -->
@@ -248,6 +250,7 @@
         </div>
         <!-- End Page Header -->
         @endif
+        @endif
     </div>
 
 
@@ -255,15 +258,18 @@
 @endsection
 
 @push('script')
-    <script src="{{asset('public/assets/admin')}}/vendor/chart.js/dist/Chart.min.js"></script>
-    <script src="{{asset('public/assets/admin')}}/vendor/chart.js.extensions/chartjs-extensions.js"></script>
-    <script
-        src="{{asset('public/assets/admin')}}/vendor/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.min.js"></script>
+    @if(empty($isClassifyDashboard))
+        <script src="{{asset('public/assets/admin')}}/vendor/chart.js/dist/Chart.min.js"></script>
+        <script src="{{asset('public/assets/admin')}}/vendor/chart.js.extensions/chartjs-extensions.js"></script>
+        <script
+            src="{{asset('public/assets/admin')}}/vendor/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.min.js"></script>
+    @endif
 
 @endpush
 
 
 @push('script_2')
+    @if(empty($isClassifyDashboard))
     <script>
 "use strict";
         $('#free-trial-modal').modal('show');
@@ -341,4 +347,5 @@
         }
 
     </script>
+    @endif
 @endpush
