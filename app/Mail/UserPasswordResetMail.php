@@ -40,10 +40,10 @@ class UserPasswordResetMail extends Mailable
         $template=$data?$data->email_template:4;
         $code = $this->otp;
         $user_name = $this->name;
-        $title = Helpers::text_variable_data_format( value:$data['title']??'',user_name:$user_name??'');
-        $body = Helpers::text_variable_data_format( value:$data['body']??'',user_name:$user_name??'');
-        $footer_text = Helpers::text_variable_data_format( value:$data['footer_text']??'',user_name:$user_name??'');
-        $copyright_text = Helpers::text_variable_data_format( value:$data['copyright_text']??'',user_name:$user_name??'');
+        $title = Helpers::text_variable_data_format(value: $data?->title ?? '', user_name: $user_name ?? '');
+        $body = Helpers::text_variable_data_format(value: $data?->body ?? '', user_name: $user_name ?? '');
+        $footer_text = Helpers::text_variable_data_format(value: $data?->footer_text ?? '', user_name: $user_name ?? '');
+        $copyright_text = Helpers::text_variable_data_format(value: $data?->copyright_text ?? '', user_name: $user_name ?? '');
         return $this->subject(translate('Password_Reset'))->view('email-templates.new-email-format-'.$template, ['company_name'=>$company_name,'data'=>$data,'title'=>$title,'body'=>$body,'footer_text'=>$footer_text,'copyright_text'=>$copyright_text,'code'=>$code]);
     }
 }

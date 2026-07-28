@@ -35,21 +35,31 @@ class ConfigServiceProvider extends ServiceProvider
                 'weekend' => [CarbonImmutable::SUNDAY],
             ]);
             $data = BusinessSetting::where(['key' => 'mail_config'])->first();
-            $emailServices = json_decode($data['value'], true);
-            if ($emailServices) {
-                $config = [
-                    'status' => (bool) (isset($emailServices['status']) ? $emailServices['status'] : 1),
-                    'driver' => $emailServices['driver'],
-                    'host' => $emailServices['host'],
-                    'port' => $emailServices['port'],
-                    'username' => $emailServices['username'],
-                    'password' => $emailServices['password'],
-                    'encryption' => $emailServices['encryption'],
-                    'from' => ['address' => $emailServices['email_id'], 'name' => $emailServices['name']],
-                    'sendmail' => '/usr/sbin/sendmail -bs',
-                    'pretend' => false,
+            $emailServices = json_decode($data['value'] ?? '', true);
+            if (is_array($emailServices) && $emailServices !== []) {
+                $mailStatus = (bool) (isset($emailServices['status']) ? $emailServices['status'] : 1);
+                $driver = $emailServices['driver'] ?? 'smtp';
+                $mailConfig = config('mail');
+                $mailConfig['status'] = $mailStatus;
+                $mailConfig['default'] = in_array($driver, ['sendmail', 'log', 'array'], true) ? $driver : 'smtp';
+
+                $mailConfig['mailers']['smtp'] = array_merge(
+                    $mailConfig['mailers']['smtp'] ?? ['transport' => 'smtp'],
+                    [
+                        'host' => $emailServices['host'] ?? data_get($mailConfig, 'mailers.smtp.host'),
+                        'port' => $emailServices['port'] ?? data_get($mailConfig, 'mailers.smtp.port'),
+                        'encryption' => $emailServices['encryption'] ?? data_get($mailConfig, 'mailers.smtp.encryption'),
+                        'username' => $emailServices['username'] ?? data_get($mailConfig, 'mailers.smtp.username'),
+                        'password' => $emailServices['password'] ?? data_get($mailConfig, 'mailers.smtp.password'),
+                    ]
+                );
+
+                $mailConfig['from'] = [
+                    'address' => $emailServices['email_id'] ?? data_get($mailConfig, 'from.address'),
+                    'name' => $emailServices['name'] ?? data_get($mailConfig, 'from.name'),
                 ];
-                Config::set('mail', $config);
+
+                Config::set('mail', $mailConfig);
             }
 
             $gateway =

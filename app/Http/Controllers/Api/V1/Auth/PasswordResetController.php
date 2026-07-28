@@ -123,27 +123,48 @@ class PasswordResetController extends Controller
                 ], 403);
             }
 
-            if ($request->verification_method === 'email' && config('mail.status')) {
+            if ($request->verification_method === 'email') {
+                if (!config('mail.status')) {
+                    return response()->json([
+                        'errors' => [
+                            ['code' => 'mail', 'message' => translate('messages.email_configuration_error')]
+                        ]
+                    ], 403);
+                }
+
+                if ((string) Helpers::get_mail_status('forget_password_mail_status_user') !== '1') {
+                    return response()->json([
+                        'errors' => [
+                            [
+                                'code' => 'mail',
+                                'message' => translate('messages.Want_to_enable_Forget_Password_mail?'),
+                            ]
+                        ]
+                    ], 403);
+                }
+
+                $recipientEmail = $customer->getRawOriginal('email') ?: $request->email;
+                if (!$recipientEmail) {
+                    return response()->json([
+                        'errors' => [
+                            ['code' => 'email', 'message' => translate('messages.email_not_found!!!')]
+                        ]
+                    ], 403);
+                }
+
                 try {
-                    $mailResponse = null;
-                    if (Helpers::get_mail_status('forget_password_mail_status_user') == '1' && $customer['email']) {
-                        Mail::to($customer?->getRawOriginal('email'))->send(new UserPasswordResetMail($token, $customer['f_name']));
-                        $mailResponse = 'success';
-                    }
+                    Mail::to($recipientEmail)->send(new UserPasswordResetMail($token, $customer['f_name']));
                 } catch (\Throwable $th) {
-                    $mailResponse = null;
-                    info($th->getMessage());
+                    info('forgot_password_mail_error: ' . $th->getMessage());
+
+                    return response()->json([
+                        'errors' => [
+                            ['code' => 'otp', 'message' => translate('messages.failed_to_send_mail')]
+                        ]
+                    ], 403);
                 }
 
-                if ($mailResponse == 'success') {
-                    return response()->json(['message' => translate('messages.Otp_Successfully_Sent_To_Your_Mail')], 200);
-                }
-
-                return response()->json([
-                    'errors' => [
-                        ['code' => 'otp', 'message' => translate('messages.failed_to_send_mail')]
-                    ]
-                ], 403);
+                return response()->json(['message' => translate('messages.Otp_Successfully_Sent_To_Your_Mail')], 200);
             }
 
             return response()->json([
