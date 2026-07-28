@@ -228,16 +228,15 @@ $site_direction = \App\CentralLogics\Helpers::system_default_direction();
             font-weight: 700
         }
 
-        .mail-img-1 {
-            width: 140px;
-            height: 60px;
-            object-fit: contain
-        }
-
+        .mail-img-1,
         .mail-img-2 {
-            width: 130px;
-            height: 45px;
-            object-fit: contain
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 200px;
+            width: auto;
+            height: auto;
+            border: 0;
         }
 
         .mail-img-3 {
@@ -274,7 +273,7 @@ $site_direction = \App\CentralLogics\Helpers::system_default_direction();
                             <tr>
                                 <td class="p-10">
                                     <span class="d-block text-center">
-                                        <img class="mb-2 mail-img-2"
+                                        <img style="display:block;margin:0 auto;max-width:200px;height:auto;width:auto;border:0;" class="mb-2 mail-img-2"
                                             src="{{ $data['logo_full_url'] ?? asset('/public/assets/admin/img/blank1.png') }}"
                                             alt="">
                                         <h3 class="mb-3 mt-0">{{ translate('Trip_Info') }}</h3>

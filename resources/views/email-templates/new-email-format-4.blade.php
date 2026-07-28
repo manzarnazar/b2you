@@ -125,15 +125,15 @@
             color: var(--base);
 font-weight: 700
         }
-        .mail-img-1 {
-            width: 140px;
-            height: 60px;
-            object-fit: contain
-        }
+        .mail-img-1,
         .mail-img-2 {
-            width: 130px;
-            height: 45px;
-            object-fit: contain
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 200px;
+            width: auto;
+            height: auto;
+            border: 0;
         }
         .mail-img-3 {
             width: 100%;
@@ -155,11 +155,13 @@ width: 24px;
             <tr>
                 <td class="main-table-td">
                     <div class="text-center">
-                    <img onerror="this.src='{{ asset('/public/assets/admin/img/blank3.png') }}'" class="mail-img-2"
+                    @php($store_logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first())
+                    @php($header_image = data_get($data, 'logo_full_url') ?: data_get($data, 'icon_full_url') ?: \App\CentralLogics\Helpers::get_full_url('business', $store_logo?->value, $store_logo?->storage[0]?->value ?? 'public', 'business'))
+                    <img style="display:block;margin:0 auto;max-width:200px;height:auto;width:auto;border:0;" onerror="this.src='{{ asset('/public/assets/admin/img/blank3.png') }}'" class="mail-img-2"
 
-                    src="{{ $data['icon_full_url'] ?? asset('/public/assets/admin/img/blank3.png') }}"
+                    src="{{ $header_image ?? asset('/public/assets/admin/img/blank3.png') }}"
 
-                    id="iconViewer" alt="">
+                    id="iconViewer" alt="{{ $company_name ?? '' }}">
                         <h2 id="mail-title" class="mt-2">{{ $title?? translate('Main_Title_or_Subject_of_the_Mail') }}</h2>
                         <div class="mb-1" id="mail-body">{!! $body?? translate('Hi_Sabrina,') !!}</div>
                         <h2 style="font-size: 26px;margin: 0;letter-spacing:4px">

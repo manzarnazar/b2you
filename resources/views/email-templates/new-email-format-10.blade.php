@@ -119,15 +119,15 @@
             color: var(--base);
             font-weight: 700
         }
-        .mail-img-1 {
-            width: 140px;
-            height: 60px;
-            object-fit: contain
-        }
+        .mail-img-1,
         .mail-img-2 {
-            width: 130px;
-            height: 45px;
-            object-fit: contain
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 200px;
+            width: auto;
+            height: auto;
+            border: 0;
         }
         .mail-img-3 {
             width: 100%;
@@ -148,7 +148,7 @@
         <tbody>
             <tr>
                 <td class="main-table-td">
-                    <img class="mail-img-1"  id="iconViewer"
+                    <img style="display:block;margin:0 auto;max-width:200px;height:auto;width:auto;border:0;" class="mail-img-1"  id="iconViewer"
                     src="{{ $data['icon_full_url'] ?? asset('/public/assets/admin/img/blank3.png') }}"
                     alt="image">
 
